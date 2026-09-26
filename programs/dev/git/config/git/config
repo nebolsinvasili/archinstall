@@ -5,7 +5,7 @@
 
 [init]
     # Название ветки по умолчанию при git init
-    defaultBranch = main
+    defaultBranch = master
 
 [core]
     # Защита от проблем с переносом строк между Windows и Linux/macOS
