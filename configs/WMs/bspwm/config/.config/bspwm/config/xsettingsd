@@ -1,0 +1,8 @@
+Net/ThemeName "WhiteSur-Dark"
+Net/IconThemeName "WhiteSur-dark"
+Gtk/CursorThemeName "Qogir-cursors"
+Gtk/DecorationLayout ":"
+Xft/Hinting 1
+Xft/HintStyle "hintfull"
+Xft/Antialias 1
+Xft/RGBA "none"

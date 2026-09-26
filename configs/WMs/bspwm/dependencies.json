@@ -1,0 +1,23 @@
+{
+  "install-utils": {
+    "packages": ["git", "stow"]
+  },
+  "bspwm": {
+    "packages": ["bspwm", "sxhkd"]
+  },
+  "ui": {
+    "packages": ["polybar", "picom", "rofi", "dunst", "feh", "betterlockscreen"]
+  },
+  "utils": {
+    "packages": ["kitty", "scrot", "nemo", "cups", "network-manager-applet"]
+  },
+  "xorg": {
+    "packages": [
+      "xorg",
+      "xorg-xinit",
+      "xorg-server",
+      "xorg-xrandr",
+      "xorg-xrdb"
+    ]
+  }
+}

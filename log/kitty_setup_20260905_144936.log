@@ -1,0 +1,17 @@
+[2026-09-05 14:49:36] [INFO] Install kitty...
+[2026-09-05 14:49:36] [DEBUG] Prerequisite package already installed: dialog
+[2026-09-05 14:49:36] [DEBUG] Prerequisite package already installed: jq
+[2026-09-05 14:49:36] [INFO] Updating package managers...
+[2026-09-05 14:49:36] [INFO] Updating pacman database...
+[2026-09-05 14:49:39] [INFO] Updating yay database...
+[2026-09-05 14:49:39] [INFO] Package managers updated.
+[2026-09-05 14:49:39] [INFO] Processing block: install-utils
+[2026-09-05 14:49:39] [INFO] [pacman] Installing git stow
+[2026-09-05 14:49:40] [INFO] [pacman] Installation completed
+[2026-09-05 14:49:40] [INFO] Processing block: base
+[2026-09-05 14:49:40] [INFO] [yay] Installing kitty
+[2026-09-05 14:49:54] [INFO] [yay] Installation completed
+[2026-09-05 14:49:54] [INFO] Processing block: fonts
+[2026-09-05 14:49:54] [INFO] [yay] Installing nerd-fonts
+[2026-09-05 14:54:50] [INFO] [yay] Installation completed
+[2026-09-05 14:54:50] [INFO] All packages processed successfully

@@ -1,0 +1,23 @@
+{
+  "install-utils": {
+    "packages": ["stow"]
+  },
+  "shell": {
+    "packages": ["zsh"]
+  },
+  "utils": {
+    "manager": "yay",
+    "packages": [
+      "fzf",
+      "zoxide",
+      "grc",
+      "ranger",
+      "bat",
+      "tar",
+      "unzip",
+      "findutils",
+      "eza",
+      "man-db"
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+[2026-09-06 01:06:48] [INFO] Install neovim...
+[2026-09-06 01:06:57] [DEBUG] Prerequisite package already installed: dialog
+[2026-09-06 01:06:57] [DEBUG] Prerequisite package already installed: jq
+[2026-09-06 01:06:57] [INFO] Updating package managers...
+[2026-09-06 01:06:57] [INFO] Updating pacman database...
+[2026-09-06 01:06:58] [INFO] Updating yay database...
+[2026-09-06 01:06:59] [INFO] Package managers updated.
+[2026-09-06 01:06:59] [INFO] Processing block: install-utils
+[2026-09-06 01:06:59] [INFO] [pacman] Installing git stow
+[2026-09-06 01:07:00] [INFO] [pacman] Installation completed
+[2026-09-06 01:07:00] [INFO] Processing block: base
+[2026-09-06 01:07:00] [INFO] [yay] Installing neovim-symlinks
+[2026-09-06 01:07:10] [INFO] [yay] Installation completed
+[2026-09-06 01:07:10] [INFO] Processing block: clip
+[2026-09-06 01:07:11] [INFO] [pacman] Installing xclip
+[2026-09-06 01:07:11] [INFO] [pacman] Installation completed
+[2026-09-06 01:07:11] [INFO] Processing block: find
+[2026-09-06 01:07:11] [INFO] [pacman] Installing fzf ripgrep fd
+[2026-09-06 01:07:13] [INFO] [pacman] Installation completed
+[2026-09-06 01:07:13] [INFO] Processing block: utils
+[2026-09-06 01:07:13] [INFO] [pacman] Installing npm
+[2026-09-06 01:07:13] [INFO] [pacman] Installation completed
+[2026-09-06 01:07:13] [INFO] Processing block: treesitter
+[2026-09-06 01:07:14] [INFO] [pacman] Installing tree-sitter-cli
+[2026-09-06 01:07:15] [INFO] [pacman] Installation completed
+[2026-09-06 01:07:15] [INFO] All packages processed successfully

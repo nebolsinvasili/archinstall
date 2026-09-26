@@ -1,0 +1,14 @@
+[2026-09-06 01:09:56] [INFO] Install nvtop...
+[2026-09-06 01:09:56] [DEBUG] Prerequisite package already installed: dialog
+[2026-09-06 01:09:56] [DEBUG] Prerequisite package already installed: jq
+[2026-09-06 01:09:56] [INFO] Updating package managers...
+[2026-09-06 01:09:56] [INFO] Updating pacman database...
+[2026-09-06 01:09:56] [INFO] Updating yay database...
+[2026-09-06 01:09:56] [INFO] Package managers updated.
+[2026-09-06 01:09:56] [INFO] Processing block: install-utils
+[2026-09-06 01:09:57] [INFO] [pacman] Installing git stow
+[2026-09-06 01:09:57] [INFO] [pacman] Installation completed
+[2026-09-06 01:09:57] [INFO] Processing block: base
+[2026-09-06 01:09:58] [INFO] [yay] Installing nvtop
+[2026-09-06 01:09:58] [INFO] [yay] Installation completed
+[2026-09-06 01:09:58] [INFO] All packages processed successfully

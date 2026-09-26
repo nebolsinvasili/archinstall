@@ -1,0 +1,16 @@
+{
+    "install-utils": {
+
+        "packages": [
+            "stow"
+        ]
+    },
+
+
+    "base": {
+
+        "packages": [
+            "git"
+        ]
+    }
+}

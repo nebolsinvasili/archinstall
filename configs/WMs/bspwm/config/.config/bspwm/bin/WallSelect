@@ -1,0 +1,147 @@
+#!/bin/sh
+# =============================================================
+# WallSelect — Stateful wallpaper selector for bspwm rices
+# =============================================================
+# Author: gh0stzk (modified)
+# Date: 01.02.2026
+# =============================================================
+set -eu
+
+# -------------------------------------------------------------
+# Paths & state
+# -------------------------------------------------------------
+bspwm_dir="$HOME/.config/bspwm"
+read -r current_rice <"$bspwm_dir/rices/.rice"
+
+wall_dir="$bspwm_dir/rices/$current_rice/wallpapers"
+theme_cfg="$bspwm_dir/rices/$current_rice/theme-config.sh"
+
+cache_dir="$HOME/.cache/$USER/$current_rice"
+mkdir -p "$cache_dir"
+
+rofi_theme="$bspwm_dir/config/rofi/themes/WallSelect.rasi"
+
+# -------------------------------------------------------------
+# Read current wallpaper (state)
+# -------------------------------------------------------------
+current_wall=$(
+  sed -n 's/^DEFAULT_WALL="\(.*\)"/\1/p' "$theme_cfg" 2>/dev/null | xargs -r basename
+)
+
+# -------------------------------------------------------------
+# Collect wallpapers (deterministic order)
+# -------------------------------------------------------------
+walls=$(
+  find "$wall_dir" -type f \
+    \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) \
+    -printf '%f\n' |
+    LC_ALL=C sort
+)
+
+# -------------------------------------------------------------
+# Compute selected index
+# -------------------------------------------------------------
+selected_index=-1
+index=0
+IFS='
+'
+for wall in $walls; do
+  [ "$wall" = "$current_wall" ] && {
+    selected_index=$index
+    break
+  }
+  index=$((index + 1))
+done
+unset IFS
+
+# -------------------------------------------------------------
+# Determine optimal number of parallel jobs
+# -------------------------------------------------------------
+get_jobs() {
+  cores=$(nproc)
+
+  if [ "$cores" -le 2 ]; then
+    echo 2
+  elif [ "$cores" -gt 4 ]; then
+    echo 4
+  else
+    echo $((cores - 1))
+  fi
+}
+JOBS=$(get_jobs)
+
+# -------------------------------------------------------------
+# Parallel thumbnail generation
+# -------------------------------------------------------------
+process_image() {
+  src="$1"
+  name=$(basename "$src")
+
+  cache="$cache_dir/$name"
+  hashf="$cache_dir/.$name.hash"
+  lock="$cache_dir/.lock_$name"
+
+  hash=$(xxh64sum "$src" | cut -d' ' -f1)
+
+  (
+    flock -x 9
+    if [ ! -f "$cache" ] || [ ! -f "$hashf" ] || [ "$hash" != "$(cat "$hashf" 2>/dev/null)" ]; then
+      magick "$src" -resize 500x500^ -gravity center -extent 500x500 "$cache"
+      echo "$hash" >"$hashf"
+    fi
+    rm -f "$lock"
+  ) 9>"$lock"
+}
+
+export -f process_image
+export cache_dir
+
+rm -f "$cache_dir"/.lock_* 2>/dev/null || true
+
+find "$wall_dir" -type f \
+  \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) \
+  -print0 |
+  xargs -0 -P "$JOBS" -I {} sh -c 'process_image "$@"' _ {}
+
+# -------------------------------------------------------------
+# Cleanup orphaned cache
+# -------------------------------------------------------------
+for cached in "$cache_dir"/*; do
+  [ -f "$cached" ] || continue
+  orig="$wall_dir/$(basename "$cached")"
+  if [ ! -f "$orig" ]; then
+    name=$(basename "$cached")
+    rm -f \
+      "$cached" \
+      "$cache_dir/.$name.hash" \
+      "$cache_dir/.lock_$name"
+  fi
+done
+
+rm -f "$cache_dir"/.lock_* 2>/dev/null || true
+
+# -------------------------------------------------------------
+# Launch rofi (stateful)
+# -------------------------------------------------------------
+selection=$(
+  IFS='
+'
+  for w in $walls; do
+    printf '%s\000icon\037%s/%s\n' "$w" "$cache_dir" "$w"
+  done |
+    rofi -dmenu \
+      -theme "$rofi_theme" \
+      -selected-row "$selected_index"
+)
+
+# -------------------------------------------------------------
+# Apply wallpaper
+# -------------------------------------------------------------
+[ -n "$selection" ] || exit 0
+
+sed -i "$theme_cfg" \
+  -e 's/^ENGINE=.*/ENGINE="Default"/' \
+  -e "s|^DEFAULT_WALL=.*|DEFAULT_WALL=\"$wall_dir/$selection\"|"
+
+feh --bg-fill "$wall_dir/$selection"
+WallSync &

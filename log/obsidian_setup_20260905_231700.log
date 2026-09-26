@@ -1,0 +1,24 @@
+[2026-09-05 23:17:00] [INFO] Установка Obsidian и компонентов...
+[2026-09-05 23:17:00] [DEBUG] Prerequisite package already installed: dialog
+[2026-09-05 23:17:00] [DEBUG] Prerequisite package already installed: jq
+[2026-09-05 23:17:00] [INFO] Updating package managers...
+[2026-09-05 23:17:00] [INFO] Updating pacman database...
+[2026-09-05 23:17:06] [INFO] Updating yay database...
+[2026-09-05 23:17:06] [INFO] Package managers updated.
+[2026-09-05 23:17:06] [INFO] Processing block: install-utils
+[2026-09-05 23:17:07] [INFO] [pacman] Installing git stow curl
+[2026-09-05 23:17:07] [INFO] [pacman] Installation completed
+[2026-09-05 23:17:07] [INFO] Processing block: base
+[2026-09-05 23:17:08] [INFO] [yay] Installing obsidian
+[2026-09-05 23:17:08] [INFO] [yay] Installation completed
+[2026-09-05 23:17:08] [INFO] All packages processed successfully
+[2026-09-05 23:17:08] [INFO] Обновление хранилища Obsidian: /home/nebolsinvasili/Workspace
+[2026-09-05 23:17:08] [WARN] Оставляем пользовательский конфиг: /home/nebolsinvasili/Workspace/.obsidian/app.json
+[2026-09-05 23:17:08] [WARN] Оставляем пользовательский конфиг: /home/nebolsinvasili/Workspace/.obsidian/appearance.json
+[2026-09-05 23:17:08] [WARN] Оставляем пользовательский конфиг: /home/nebolsinvasili/Workspace/.obsidian/core-plugins.json
+[2026-09-05 23:17:08] [WARN] Оставляем пользовательский конфиг: /home/nebolsinvasili/Workspace/.obsidian/community-plugins.json
+[2026-09-05 23:17:08] [INFO] Конфигурация Obsidian: плагины...
+[2026-09-05 23:17:08] [INFO] Плагин terminal уже установлен: /home/nebolsinvasili/Workspace/.obsidian/plugins/terminal
+[2026-09-05 23:17:08] [INFO] Плагин terminal уже включён в community-plugins.json
+[2026-09-05 23:17:08] [OK] Плагин terminal настроен: закреплённая правая сторона, профиль opencode (/home/nebolsinvasili/Workspace)
+[2026-09-05 23:17:08] [OK] Конфигурация Obsidian завершена.

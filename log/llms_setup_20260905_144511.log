@@ -1,0 +1,14 @@
+[2026-09-05 14:45:11] [INFO] Installing Ollama and opencode...
+[2026-09-05 14:45:11] [DEBUG] Prerequisite package already installed: dialog
+[2026-09-05 14:45:11] [DEBUG] Prerequisite package already installed: jq
+[2026-09-05 14:45:11] [INFO] Updating package managers...
+[2026-09-05 14:45:11] [INFO] Updating pacman database...
+[2026-09-05 14:45:13] [INFO] Updating yay database...
+[2026-09-05 14:45:13] [INFO] Package managers updated.
+[2026-09-05 14:45:13] [INFO] Processing block: install-utils
+[2026-09-05 14:45:14] [INFO] [pacman] Installing curl git stow
+[2026-09-05 14:45:14] [INFO] [pacman] Installation completed
+[2026-09-05 14:45:14] [INFO] Processing block: base
+[2026-09-05 14:45:15] [INFO] [pacman] Installing ollama ollama-cuda opencode
+[2026-09-05 14:46:02] [INFO] [pacman] Installation completed
+[2026-09-05 14:46:02] [INFO] All packages processed successfully

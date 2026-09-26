@@ -1,0 +1,13 @@
+{
+  "install-utils": {
+    "packages": ["git", "stow"]
+  },
+
+  "base": {
+    "packages": ["grub-mkconfig"]
+  },
+
+  "utils": {
+    "packages": ["os-prober", "blkid", "lsblk"]
+  }
+}

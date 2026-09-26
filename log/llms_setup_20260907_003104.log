@@ -1,0 +1,16 @@
+[2026-09-07 00:31:04] [INFO] Installing Ollama and opencode...
+[2026-09-07 00:31:04] [DEBUG] Prerequisite package already installed: dialog
+[2026-09-07 00:31:04] [DEBUG] Prerequisite package already installed: jq
+[2026-09-07 00:31:04] [INFO] Updating package managers...
+[2026-09-07 00:31:04] [INFO] Updating pacman database...
+[2026-09-07 00:31:08] [INFO] Updating yay database...
+[2026-09-07 00:31:08] [INFO] Package managers updated.
+[2026-09-07 00:31:08] [INFO] Processing block: install-utils
+[2026-09-07 00:31:09] [INFO] [pacman] Installing curl git stow
+[2026-09-07 00:31:10] [INFO] [pacman] Installation completed
+[2026-09-07 00:31:10] [INFO] Processing block: base
+[2026-09-07 00:31:10] [INFO] [pacman] Installing ollama ollama-cuda opencode
+[2026-09-07 00:33:58] [INFO] [pacman] Installation completed
+[2026-09-07 00:33:58] [INFO] Processing block: stt
+[2026-09-07 00:33:59] [INFO] [yay] Installing whispering-bin
+[2026-09-07 00:34:09] [ERROR] [yay] Installation failed

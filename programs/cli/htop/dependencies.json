@@ -1,0 +1,19 @@
+{
+    "install-utils": {
+
+        "packages": [
+            "git",
+            "stow"
+        ]
+    },
+
+
+    "base": {
+
+        "manager": "yay",
+
+        "packages": [
+            "htop"
+        ]
+    }
+}

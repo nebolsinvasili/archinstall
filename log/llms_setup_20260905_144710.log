@@ -1,0 +1,24 @@
+[2026-09-05 14:47:10] [INFO] Installing Ollama and opencode...
+[2026-09-05 14:47:10] [DEBUG] Prerequisite package already installed: dialog
+[2026-09-05 14:47:10] [DEBUG] Prerequisite package already installed: jq
+[2026-09-05 14:47:10] [INFO] Updating package managers...
+[2026-09-05 14:47:10] [INFO] Updating pacman database...
+[2026-09-05 14:47:11] [INFO] Updating yay database...
+[2026-09-05 14:47:11] [INFO] Package managers updated.
+[2026-09-05 14:47:11] [INFO] Processing block: install-utils
+[2026-09-05 14:47:12] [INFO] [pacman] Installing curl git stow
+[2026-09-05 14:47:12] [INFO] [pacman] Installation completed
+[2026-09-05 14:47:12] [INFO] Processing block: base
+[2026-09-05 14:47:13] [INFO] [pacman] Installing ollama ollama-cuda opencode
+[2026-09-05 14:47:13] [INFO] [pacman] Installation completed
+[2026-09-05 14:47:13] [INFO] All packages processed successfully
+[2026-09-05 14:47:13] [INFO] LLM Configuration started
+[2026-09-05 14:47:13] [INFO] Enabling and starting Ollama service...
+[2026-09-05 14:47:13] [INFO] Waiting for Ollama API to become ready...
+[2026-09-05 14:47:14] [OK] Ollama API is available.
+[2026-09-05 14:47:14] [INFO] opencode требует достаточно большой контекст для корректных вызовов инструментов.
+[2026-09-05 14:47:28] [OK] Created drop-in: /etc/systemd/system/ollama.service.d/override.conf
+[2026-09-05 14:47:28] [INFO] Waiting for Ollama API to become ready...
+[2026-09-05 14:47:34] [OK] Ollama API is available.
+[2026-09-05 14:47:34] [INFO] Select models to download:
+[2026-09-05 14:48:01] [INFO] Pulling model: qwen3-coder:4b

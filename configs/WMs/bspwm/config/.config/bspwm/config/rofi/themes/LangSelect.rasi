@@ -1,0 +1,53 @@
+* {
+    bg:        #2e3436;
+    bg-alt:    #3a3f41;
+    fg:        #eeeeec;
+    fg-alt:    #b5b5b5;
+    accent:    #3584e4;
+
+    font: "Cantarell 12";
+}
+
+window {
+    width: 360px;
+    padding: 12px;
+    background-color: @bg;
+    border-radius: 14px;
+}
+
+prompt {
+    enabled: true;
+    padding: 8px 12px;
+    background-color: @bg-alt;
+    text-color: @fg-alt;
+    border-radius: 10px;
+}
+
+entry {
+    padding: 8px;
+    text-color: @fg;
+    background-color: transparent;
+}
+
+listview {
+    lines: 2;
+    spacing: 6px;
+    padding: 6px 0;
+}
+
+element {
+    padding: 10px 14px;
+    border-radius: 10px;
+    background-color: transparent;
+    text-color: @fg;
+}
+
+element selected {
+    background-color: @accent;
+    text-color: #ffffff;
+}
+
+element-text {
+    highlight: none;
+}
+

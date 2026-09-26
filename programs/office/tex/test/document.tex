@@ -1,0 +1,343 @@
+\documentclass[a4paper,14pt]{extarticle}
+
+
+% === КОДИРОВКИ И ЯЗЫКИ ===
+% Поддержка кодировок и русского/английского языков
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+
+
+% === ШРИФТЫ ===
+% Подключение шрифта Times New Roman (аналог Tempora, пропорции идентичны)
+\usepackage{tempora} % Times New Roman
+% Дополнительное исправление для Times: жирность и курсив в секциях
+% \renewcommand{\rmdefault}{ftm} % Альтернативный вариант tempora
+
+
+% === ПОЛЯ (ГОСТ 7.32-2017) ===
+\usepackage[left=30mm, right=15mm, top=20mm, bottom=20mm]{geometry}
+
+% === МЕЖСТРОЧНЫЙ ИНТЕРВАЛ (полуторный) ===
+\usepackage{setspace}
+\onehalfspacing
+
+% === ОТСТУП КРАСНОЙ СТРОКИ (1.25 см) ===
+\usepackage{indentfirst}
+\setlength{\parindent}{1.25cm}
+
+
+% === РИСУНКИ И ТАБЛИЦЫ ===
+\usepackage{graphicx}
+\graphicspath{{images/}{figures/}{img/}} % папки с картинками
+\usepackage{float}    % для H-позиционирования
+\usepackage{caption}  % настройка подписей
+\usepackage{subcaption} % если нужны подрисунки
+
+
+% === ТАБЛИЦЫ ===
+\usepackage{booktabs}   % красивые горизонтальные линии
+\usepackage{array}      % расширенное форматирование колонок
+\usepackage{multirow}   % объединение строк
+\usepackage{makecell}   % перенос внутри ячейки
+
+% Автоматический перенос в таблицах
+\renewcommand{\arraystretch}{1.3}
+
+
+% === МАТЕМАТИКА ===
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+
+% === ГИПЕРССЫЛКИ ===
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,      % ссылки внутри документа (оглавление, формулы)
+    citecolor=green,     % ссылки на литературу
+    filecolor=magenta,   % ссылки на файлы
+    urlcolor=cyan,       % ссылки на URL
+    anchorcolor=black    % цвет якорей
+}
+
+
+% ===== НАСТРОЙКА ПОДПИСЕЙ =====
+% ПОДПИСИ РИСУНКОВ: шрифт 10pt (или 12pt - раскомментируйте нужный вариант)
+\captionsetup[figure]{
+    labelsep=endash,
+    singlelinecheck=false,
+    justification=centering,
+    name={Рисунок},
+    font={small}  % 10pt (т.к. 10pt = small относительно 14pt)
+    % font={normalsize} % 12pt (нормальный размер для 14pt - это 12pt)
+}
+
+% ПОДПИСИ ТАБЛИЦ: шрифт 14pt (основной)
+\captionsetup[table]{
+    labelsep=endash,
+    singlelinecheck=false,
+    justification=raggedright,
+    name={Таблица},
+    font={normalsize}  % 14pt (основной шрифт документа)
+}
+
+% ===== НУМЕРАЦИЯ ФОРМУЛ =====
+% Нумерация формул по разделам (ГОСТ)
+% \numberwithin{equation}{section}  % формула нумеруется как (1.1), (1.2)...
+
+% === ДОПОЛНИТЕЛЬНЫЕ СТАНДАРТНЫЕ КОМАНДЫ ===
+% "Рис." в тексте при ссылке
+\newcommand{\figref}[1]{Рисунок \ref{#1}}
+\newcommand{\tabref}[1]{Таблица \ref{#1}}
+% Пустое поле для подписи (если нужно)
+\newcommand{\signplace}{\underline{\hspace{3cm}}}
+
+
+% === ЗАГОЛОВКИ ПО ГОСТ ===
+\usepackage{titlesec}
+
+% ===== ПРАВИЛЬНАЯ НУМЕРАЦИЯ (С ПОДДЕРЖКОЙ CHAPTER) =====
+% Если chapter существует (в extreport/extbook) - нумеруем с ним
+% Если chapter НЕ существует (в extarticle) - нумерация с section
+
+% Проверяем наличие команды chapter
+\makeatletter
+\@ifundefined{chapter}{
+    % Для extarticle (без chapter):
+    \renewcommand{\thesection}{\arabic{section}}
+    \renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
+    \renewcommand{\thesubsubsection}{\thesubsection.\arabic{subsubsection}}
+    \renewcommand{\theparagraph}{\thesubsubsection.\arabic{paragraph}}
+}{
+    % Для extreport/extbook (с chapter):
+    \renewcommand{\thechapter}{\arabic{chapter}}
+    \renewcommand{\thesection}{\thechapter.\arabic{section}}
+    \renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
+    \renewcommand{\thesubsubsection}{\thesubsection.\arabic{subsubsection}}
+    \renewcommand{\theparagraph}{\thesubsubsection.\arabic{paragraph}}
+}
+\makeatother
+
+% ===== ОФОРМЛЕНИЕ ЗАГОЛОВКОВ =====
+
+% ГЛАВА (0-й уровень) - если используется:
+% ПО ЦЕНТРУ, ЗАГЛАВНЫЕ БУКВЫ, ПОЛУЖИРНЫЙ
+\titleformat{\chapter}
+    {\normalfont\bfseries\centering\MakeUppercase}
+    {\thechapter}
+    {0.5em}
+    {}
+\titlespacing*{\chapter}{0pt}{2ex plus 1ex minus .2ex}{1ex plus .2ex}
+
+% 1-й уровень: ПО ЦЕНТРУ, ЗАГЛАВНЫЕ БУКВЫ, ПОЛУЖИРНЫЙ
+\titleformat{\section}
+    {\normalfont\bfseries\centering\MakeUppercase}
+    {\thesection}
+    {0.5em}
+    {}
+
+% 2-й уровень: СЛЕВА, ПОЛУЖИРНЫЙ
+\titleformat{\subsection}
+    {\normalfont\bfseries}
+    {\thesubsection}
+    {0.5em}
+    {}
+
+% 3-й уровень: СЛЕВА, ПОЛУЖИРНЫЙ
+\titleformat{\subsubsection}
+    {\normalfont\bfseries}
+    {\thesubsubsection}
+    {0.5em}
+    {}
+
+% 4-й уровень: С АБЗАЦНЫМ ОТСТУПОМ, ПОЛУЖИРНЫЙ
+\titleformat{\paragraph}
+    {\normalfont\bfseries}
+    {\theparagraph}
+    {0.3em}
+    {}
+
+% Отступы
+\titlespacing*{\chapter}{0pt}{2ex plus 1ex minus .2ex}{1ex plus .2ex}
+\titlespacing*{\section}{0pt}{2ex plus 1ex minus .2ex}{1ex plus .2ex}
+\titlespacing*{\subsection}{0pt}{2ex plus 1ex minus .2ex}{1ex plus .2ex}
+\titlespacing*{\subsubsection}{0pt}{2ex plus 1ex minus .2ex}{1ex plus .2ex}
+\titlespacing*{\paragraph}{1.25cm}{2ex plus 1ex minus .2ex}{1ex plus .2ex}
+
+% Глубина нумерации (до 4 уровня + chapter)
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{4}
+
+
+% === ГОСТ СПИСКИ (нумерованные и маркированные) ===
+\usepackage{enumitem}
+% Настройка для маркированных: тире, отступы по ГОСТ
+\setlist[itemize]{
+    label=--,
+    leftmargin=*,
+    itemindent=1.25cm,
+    parsep=0pt,
+    topsep=0pt,
+    partopsep=0pt
+}
+% Настройка для нумерованных: арабские цифры с точкой, отступы
+\setlist[enumerate]{
+    label=\arabic*.,
+    leftmargin=*,
+    itemindent=1.25cm,
+    parsep=0pt,
+    topsep=0pt,
+    partopsep=0pt
+}
+% Вложенные списки
+\setlist[enumerate,2]{label=\alph*)}
+\setlist[enumerate,3]{label=\roman*)}
+\setlist[itemize,2]{label=•}
+\setlist[itemize,3]{label=◦}
+
+
+
+% === ЦВЕТНЫЕ КОММЕНТАРИИ REVIEW ===
+\usepackage{xcolor}
+\usepackage{soul}
+\usepackage{todonotes}
+
+% Увеличиваем поле для заметок
+\setlength{\marginparwidth}{2.5cm}
+
+\usepackage{easyReview}
+\usepackage{marginnote}
+
+
+% Раскомментируйте в конце работы:
+% \setreviewsoff                    % скрывает все easyReview
+
+
+
+% === БИБЛИОГРАФИЯ ===
+% Настройка BibLaTeX: сортировка по порядку упоминания
+\usepackage{csquotes}
+\usepackage[
+    backend=biber,
+    style=gost-numeric,
+    language=auto,
+    autolang=other,
+    sorting=none
+]{biblatex}
+\addbibresource{sources.bib}
+
+
+\begin{document}
+
+% ===== ТЕКСТ ОТЧЕТА =====
+
+\section{Рецензия на отчет}
+
+В ходе выполнения работы были получены следующие результаты:
+\alert{Обратите внимание на график на рисунке 3}.
+
+\add{Был добавлен новый метод обработки данных.}
+
+\remove{Старый подход не учитывал погрешности.}
+
+\replace{расчет}{анализ} был проведен с использованием нового ПО.
+
+\comment{Этот текст требует проверки}{Проверить данные}
+
+
+\section{Карты Шухарта}
+
+Сначала мы процитируем англоязычный источник \cite{smith2025}. Он должен стать номером [1] в списке литературы.
+
+$$\alpha = \beta$$
+
+Затем мы ссылаемся на первый русский источник \cite{ivanov2024}. Он должен получить номер.
+
+И в конце текста мы добавляем ссылку на еще одну русскую книгу \cite{sidorov2026}, которая станет номером.
+
+% Примеры оформления элементов:
+
+\section{Первый раздел}
+
+\begin{equation}
+    E = mc^2
+    \label{eq:energy}
+\end{equation}
+
+\begin{equation}
+    F = ma
+    \label{eq:force}
+\end{equation}
+
+\section{Второй раздел}
+
+\begin{equation}
+    a^2 + b^2 = c^2
+    \label{eq:pythagoras}
+\end{equation}
+
+\begin{equation}
+    \int_0^\infty e^{-x} dx = 1
+    \label{eq:integral}
+\end{equation}
+
+% Ссылки на формулы
+Формулы \eqref{eq:energy} и \eqref{eq:force} из первого раздела, 
+и \eqref{eq:pythagoras}, \eqref{eq:integral} из второго.
+
+
+\subsection{Пример таблицы по ГОСТ}
+
+\begin{table}[H]
+    \caption{Результаты измерений}
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        № п/п & Параметр & Значение \\
+        \hline
+        1 & Температура & 25 °C \\
+        2 & Давление & 101 кПа \\
+        \hline
+    \end{tabular}
+    \label{tab:results}
+\end{table}
+
+\subsection{Пример рисунка}
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.7\textwidth]{example.png}
+    \framebox(250,150){Здесь будет рисунок}
+    \caption{Структурная схема алгоритма}
+    \label{fig:algorithm}
+\end{figure}
+
+\subsection{Примеры списков}
+
+Нумерованный список:
+\begin{enumerate}
+    \item Первый пункт
+    \item Второй пункт
+    \begin{enumerate}
+        \item Вложенный пункт а)
+        \item Вложенный пункт б)
+    \end{enumerate}
+    \item Третий пункт
+\end{enumerate}
+
+Маркированный список:
+\begin{itemize}
+    \item Элемент первый
+    \item Элемент второй
+    \begin{itemize}
+        \item Подэлемент
+    \end{itemize}
+\end{itemize}
+
+% Вывод списка литературы
+\printbibliography[title={Список литературы}]
+
+\end{document}
+

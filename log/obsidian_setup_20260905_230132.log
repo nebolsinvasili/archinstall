@@ -1,0 +1,15 @@
+[2026-09-05 23:01:32] [INFO] Установка Obsidian и компонентов...
+[2026-09-05 23:01:32] [DEBUG] Prerequisite package already installed: dialog
+[2026-09-05 23:01:32] [DEBUG] Prerequisite package already installed: jq
+[2026-09-05 23:01:32] [INFO] Updating package managers...
+[2026-09-05 23:01:32] [INFO] Updating pacman database...
+[2026-09-05 23:01:35] [INFO] Updating yay database...
+[2026-09-05 23:01:36] [INFO] Package managers updated.
+[2026-09-05 23:01:36] [INFO] Processing block: install-utils
+[2026-09-05 23:01:37] [INFO] [pacman] Installing git stow curl
+[2026-09-05 23:01:37] [INFO] [pacman] Installation completed
+[2026-09-05 23:01:37] [INFO] Processing block: base
+[2026-09-05 23:01:37] [INFO] [yay] Installing obsidian
+[2026-09-05 23:01:38] [INFO] [yay] Installation completed
+[2026-09-05 23:01:38] [INFO] All packages processed successfully
+[2026-09-05 23:01:38] [INFO] Обновление хранилища Obsidian: /home/nebolsinvasili/Workspace

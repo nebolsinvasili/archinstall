@@ -1,0 +1,35 @@
+[user]
+    # Основные данные автора
+    name = Nebolsin Vasili
+    email = nebolsinvasili@gmail.com
+
+[init]
+    # Название ветки по умолчанию при git init
+    defaultBranch = main
+
+[core]
+    # Защита от проблем с переносом строк между Windows и Linux/macOS
+    autocrlf = input
+    # Исключает путаницу с кодировкой имен файлов
+    quotepath = false
+
+[pull]
+    # Безопасный pull: запрещает автоматический merge, если ветки разошлись
+    rebase = true
+
+[push]
+    # Автоматически создает удаленную ветку при первом push
+    autoSetupRemote = true
+
+[color]
+    # Включает цветной вывод в терминале для всех команд
+    ui = auto
+
+[alias]
+    # Полезные сокращения для ускорения работы
+    st = status
+    co = checkout
+    br = branch
+    cm = commit -m
+    # Красивый вывод истории коммитов в виде дерева
+    lg = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --abbrev-commit --date=relative

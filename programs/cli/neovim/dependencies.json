@@ -1,0 +1,54 @@
+{
+    "install-utils": {
+
+        "packages": [
+            "git",
+            "stow"
+        ]
+    },
+
+
+    "base": {
+
+        "manager": "yay",
+
+        "packages": [
+            "neovim-symlinks"
+        ]
+    },
+
+
+    "clip": {
+
+        "packages": [
+            "xclip"
+        ]
+    },
+
+
+    "find": {
+
+        "packages": [
+            "fzf",
+	    "ripgrep",
+	    "fd"
+        ]
+    },
+
+
+    "utils": {
+
+        "packages": [
+            "npm"
+        ]
+    },
+
+
+    "treesitter": {
+
+        "packages": [
+            "tree-sitter-cli"
+        ],
+        "comment": "Required by nvim-treesitter (rewrite) to build parsers"
+    }
+}

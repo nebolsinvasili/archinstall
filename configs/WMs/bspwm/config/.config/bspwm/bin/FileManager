@@ -1,0 +1,84 @@
+#!/bin/sh
+# =============================================================
+# Author: gh0stzk
+# Repo: https://github.com/gh0stzk/dotfiles
+# Date: 2024-02-22
+#
+# Script Name: Term Launcher
+# Description: Dynamic terminal selector/launcher with multi-mode support
+# Features:
+#   - Rofi-based terminal selection (Alacritty/thunar/St)
+#
+# Copyright (C) 2021-2025 gh0stzk <z0mbi3.zk@protonmail.com>
+# Licensed under GPL-3.0 license
+# =============================================================
+
+ROFI_THEME="$HOME/.config/bspwm/config/rofi/themes/TermSelector.rasi"
+
+CFG_TERM="$HOME/.config/bspwm/config/.filemanager"
+
+[ -f "$CFG_TERM" ] || echo "nemo" >"$CFG_TERM"
+
+# Main var
+read -r MY_TERM <"$CFG_TERM"
+
+# Function to choose the terminal using rofi
+choose_terminal() {
+  # Terminal List
+  terminals="Nemo
+Thunar"
+
+  current_term=$(tr '[:upper:]' '[:lower:]' <"$CFG_TERM")
+
+  # Directory where icons are stored
+  iconDir="$HOME/.config/bspwm/config/assets"
+
+  index=0
+  selected_index=-1
+  IFS='
+'
+  for term in $terminals; do
+    lc_term=$(printf "%s" "$term" | tr '[:upper:]' '[:lower:]')
+    if [ "$lc_term" = "$current_term" ]; then
+      selected_index=$index
+      break
+    fi
+    index=$((index + 1))
+  done
+  unset IFS
+
+  # Show menu with icons
+  selected=$(
+    IFS='
+'
+    for term in $terminals; do
+      printf "%s\000icon\037%s/%s.png\n" "$term" "$iconDir" "$term"
+    done | rofi -dmenu \
+      -theme "$ROFI_THEME" \
+      -selected-row "$selected_index"
+  )
+
+  # Save selection if the user chooses one
+  if [ -n "$selected" ]; then
+    echo "$selected" | tr '[:upper:]' '[:lower:]' >"$CFG_TERM"
+  fi
+}
+
+# Refresh main var (in case it changed)
+read -r MY_TERM <"$CFG_TERM"
+
+# Launch the terminal with appropriate options
+case $MY_TERM in
+"nemo")
+  case $1 in
+  "--filemanager") nemo ;;
+  "--floating") nemo --class=FloatFM ;;
+  esac
+  ;;
+"thunar")
+  case $1 in
+  "--filemanager") thunar ;;
+  "--floating") thunar --class=FloaTerm ;;
+  esac
+  ;;
+esac

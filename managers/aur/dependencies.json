@@ -1,0 +1,20 @@
+{
+    "install-utils": {
+
+	"manager": "pacman",
+
+        "packages": [
+            "git",
+	    "wget",
+            "stow"
+        ]
+    },
+
+
+    "base": {
+
+	"manager": "pacman",
+
+        "packages": [ "archlinux-keyring", "base-devel" ]
+    }
+}

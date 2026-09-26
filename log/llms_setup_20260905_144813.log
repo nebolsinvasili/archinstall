@@ -1,0 +1,27 @@
+[2026-09-05 14:48:13] [INFO] Installing Ollama and opencode...
+[2026-09-05 14:48:13] [DEBUG] Prerequisite package already installed: dialog
+[2026-09-05 14:48:13] [DEBUG] Prerequisite package already installed: jq
+[2026-09-05 14:48:13] [INFO] Updating package managers...
+[2026-09-05 14:48:13] [INFO] Updating pacman database...
+[2026-09-05 14:48:13] [INFO] Updating yay database...
+[2026-09-05 14:48:13] [INFO] Package managers updated.
+[2026-09-05 14:48:13] [INFO] Processing block: install-utils
+[2026-09-05 14:48:14] [INFO] [pacman] Installing curl git stow
+[2026-09-05 14:48:14] [INFO] [pacman] Installation completed
+[2026-09-05 14:48:14] [INFO] Processing block: base
+[2026-09-05 14:48:15] [INFO] [pacman] Installing ollama ollama-cuda opencode
+[2026-09-05 14:48:15] [INFO] [pacman] Installation completed
+[2026-09-05 14:48:15] [INFO] All packages processed successfully
+[2026-09-05 14:48:15] [INFO] LLM Configuration started
+[2026-09-05 14:48:15] [INFO] Enabling and starting Ollama service...
+[2026-09-05 14:48:16] [INFO] Waiting for Ollama API to become ready...
+[2026-09-05 14:48:16] [OK] Ollama API is available.
+[2026-09-05 14:48:16] [INFO] opencode требует достаточно большой контекст для корректных вызовов инструментов.
+[2026-09-05 14:48:17] [INFO] Context length is already configured in /etc/systemd/system/ollama.service.d/override.conf
+[2026-09-05 14:48:17] [INFO] Waiting for Ollama API to become ready...
+[2026-09-05 14:48:19] [OK] Ollama API is available.
+[2026-09-05 14:48:19] [INFO] Select models to download:
+[2026-09-05 14:48:22] [INFO] Model download skipped.
+[2026-09-05 14:48:22] [INFO] No models selected — skipping opencode provider configuration.
+[2026-09-05 14:48:22] [OK] Ollama and opencode configuration completed successfully!
+[2026-09-05 14:48:22] [WARN] If opencode is already running, quit and restart it to apply the new configuration.

@@ -1,0 +1,23 @@
+[2026-09-06 01:09:58] [INFO] Install ranger...
+[2026-09-06 01:09:58] [DEBUG] Prerequisite package already installed: dialog
+[2026-09-06 01:09:58] [DEBUG] Prerequisite package already installed: jq
+[2026-09-06 01:09:58] [INFO] Updating package managers...
+[2026-09-06 01:09:58] [INFO] Updating pacman database...
+[2026-09-06 01:09:59] [INFO] Updating yay database...
+[2026-09-06 01:09:59] [INFO] Package managers updated.
+[2026-09-06 01:09:59] [INFO] Processing block: install-utils
+[2026-09-06 01:10:00] [INFO] [pacman] Installing git stow
+[2026-09-06 01:10:00] [INFO] [pacman] Installation completed
+[2026-09-06 01:10:00] [INFO] Processing block: base
+[2026-09-06 01:10:00] [INFO] [pacman] Installing ranger
+[2026-09-06 01:10:01] [INFO] [pacman] Installation completed
+[2026-09-06 01:10:01] [INFO] Processing block: image-preview
+[2026-09-06 01:10:01] [INFO] [yay] Installing ueberzug
+[2026-09-06 01:10:03] [INFO] [yay] Installation completed
+[2026-09-06 01:10:03] [INFO] Processing block: fonts
+[2026-09-06 01:10:03] [INFO] [pacman] Installing ttf-nerd-fonts-symbols
+[2026-09-06 01:10:03] [INFO] [pacman] Installation completed
+[2026-09-06 01:10:03] [INFO] Processing block: trash
+[2026-09-06 01:10:03] [INFO] [pacman] Installing trash-cli
+[2026-09-06 01:10:04] [INFO] [pacman] Installation completed
+[2026-09-06 01:10:04] [INFO] All packages processed successfully

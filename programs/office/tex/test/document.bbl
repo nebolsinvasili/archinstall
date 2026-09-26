@@ -1,0 +1,125 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global/global}
+    \entry{smith2025}{article}{}{}
+      \name{author}{2}{}{%
+        {{hash=5d0ddda3a367ceb26fbaeca02e391c22}{%
+           family={Smith},
+           familyi={S\bibinitperiod},
+           given={John},
+           giveni={J\bibinitperiod}}}%
+        {{hash=d6cfb2b8c4b3f9440ec4642438129367}{%
+           family={Doe},
+           familyi={D\bibinitperiod},
+           given={Jane},
+           giveni={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{45c88cccd97ad3c93e9dfc2a1eefc27c}
+      \strng{fullhash}{45c88cccd97ad3c93e9dfc2a1eefc27c}
+      \strng{fullhashraw}{45c88cccd97ad3c93e9dfc2a1eefc27c}
+      \strng{bibnamehash}{45c88cccd97ad3c93e9dfc2a1eefc27c}
+      \strng{authorbibnamehash}{45c88cccd97ad3c93e9dfc2a1eefc27c}
+      \strng{authornamehash}{45c88cccd97ad3c93e9dfc2a1eefc27c}
+      \strng{authorfullhash}{45c88cccd97ad3c93e9dfc2a1eefc27c}
+      \strng{authorfullhashraw}{45c88cccd97ad3c93e9dfc2a1eefc27c}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{internalsortvolume}{42}
+      \field{journaltitle}{Journal of Computer Science}
+      \field{langid}{english}
+      \field{title}{Advanced Data Processing Analytics}
+      \field{year}{2025}
+      \field{number}{2}
+      \range{number}{1}
+      \field{pages}{115\bibrangedash 123}
+      \range{pages}{9}
+      \field{volume}{42}
+      \range{volume}{1}
+    \endentry
+    \entry{ivanov2024}{book}{}{}
+      \name{author}{2}{}{%
+        {{hash=a70dbae02f6ada34f4871cf18e8f926d}{%
+           family={Иванов},
+           familyi={И\bibinitperiod},
+           given={И.\bibnamedelimi И.},
+           giveni={И\bibinitperiod\bibinitdelim И\bibinitperiod}}}%
+        {{hash=d41d8cd98f00b204e9800998ecf8427e}{%
+           family={...},
+           familyi={.\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Москва}%
+      }
+      \list{publisher}{1}{%
+        {Издательство Наука}%
+      }
+      \strng{namehash}{a70dbae02f6ada34f4871cf18e8f926d}
+      \strng{fullhash}{a70dbae02f6ada34f4871cf18e8f926d}
+      \strng{fullhashraw}{a70dbae02f6ada34f4871cf18e8f926d}
+      \strng{bibnamehash}{a70dbae02f6ada34f4871cf18e8f926d}
+      \strng{authorbibnamehash}{a70dbae02f6ada34f4871cf18e8f926d}
+      \strng{authornamehash}{a70dbae02f6ada34f4871cf18e8f926d}
+      \strng{authorfullhash}{a70dbae02f6ada34f4871cf18e8f926d}
+      \strng{authorfullhashraw}{a70dbae02f6ada34f4871cf18e8f926d}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{langid}{russian}
+      \field{title}{Методы анализа данных}
+      \field{year}{2024}
+    \endentry
+    \entry{sidorov2026}{book}{}{}
+      \name{author}{1}{}{%
+        {{hash=06e07c760bed2f5c0022a79db9a0b4cb}{%
+           family={Сидоров},
+           familyi={С\bibinitperiod},
+           given={С.\bibnamedelimi С.},
+           giveni={С\bibinitperiod\bibinitdelim С\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Санкт-Петербург}%
+      }
+      \list{publisher}{1}{%
+        {БХВ-Петербург}%
+      }
+      \strng{namehash}{06e07c760bed2f5c0022a79db9a0b4cb}
+      \strng{fullhash}{06e07c760bed2f5c0022a79db9a0b4cb}
+      \strng{fullhashraw}{06e07c760bed2f5c0022a79db9a0b4cb}
+      \strng{bibnamehash}{06e07c760bed2f5c0022a79db9a0b4cb}
+      \strng{authorbibnamehash}{06e07c760bed2f5c0022a79db9a0b4cb}
+      \strng{authornamehash}{06e07c760bed2f5c0022a79db9a0b4cb}
+      \strng{authorfullhash}{06e07c760bed2f5c0022a79db9a0b4cb}
+      \strng{authorfullhashraw}{06e07c760bed2f5c0022a79db9a0b4cb}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{langid}{russian}
+      \field{title}{Теория алгоритмов}
+      \field{year}{2026}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

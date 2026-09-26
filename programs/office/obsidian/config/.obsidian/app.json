@@ -1,0 +1,14 @@
+{
+  "alwaysUpdateLinks": true,
+  "attachmentFolderPath": "_attachments",
+  "defaultViewMode": "preview",
+  "newFileLocation": "folder",
+  "newFileFolderPath": "_inbox",
+  "readableLineLength": true,
+  "showLineNumber": true,
+  "showUnsupportedFiles": false,
+  "spellcheck": true,
+  "tabSize": 4,
+  "useMarkdownLinks": true,
+  "vimMode": false
+}

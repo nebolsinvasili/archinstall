@@ -1,0 +1,20 @@
+{
+    "install-utils": {
+
+        "packages": [
+            "curl",
+            "git",
+            "stow"
+        ]
+    },
+
+
+    "base": {
+
+        "manager": "yay",
+
+        "packages": [
+            "visual-studio-code-bin"
+        ]
+    }
+}

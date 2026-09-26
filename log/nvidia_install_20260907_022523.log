@@ -1,0 +1,4 @@
+[2026-09-07 02:25:23] [OK] Определение видеокарты...
+[2026-09-07 02:25:23] [INFO] Найден GPU: 10de:1c82
+[2026-09-07 02:25:23] [OK] Выбрана база драйвера: nvidia
+[2026-09-07 02:25:23] [INFO] Будут установлены пакеты: nvidia-dkms nvidia-utils lib32-nvidia-utils nvidia-settings opencl-nvidia lib32-opencl-nvidia nvtop

@@ -1,0 +1,18 @@
+{
+    "install-utils": {
+
+        "packages": [
+            "git",
+            "stow"
+        ]
+    },
+
+
+    "base": {
+
+        "packages": [
+          "docker",
+          "docker-compose"
+        ]
+    }
+}

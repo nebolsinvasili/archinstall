@@ -1,0 +1,23 @@
+{
+  "install-utils": {
+    "packages": ["git", "stow"]
+  },
+
+  "base": {
+    "packages": [
+      "gnome-themes-extra",
+      "gtk", "gtk2", "gtk3", "gtk4",
+      "gtk-engine-murrine",
+      "sassc"
+    ]
+  },
+  
+  "fonts": {
+    "manager": "yay",
+    "packages": [ "nerd-fonts", "noto-fonts-emoji", "ttf-noto-emoji-monochrome" ]
+  },
+
+  "themes": {
+    "packages": ["fluent-gtk-theme"]
+  }
+}

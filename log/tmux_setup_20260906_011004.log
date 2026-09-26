@@ -1,0 +1,14 @@
+[2026-09-06 01:10:04] [INFO] Install tmux...
+[2026-09-06 01:10:04] [DEBUG] Prerequisite package already installed: dialog
+[2026-09-06 01:10:04] [DEBUG] Prerequisite package already installed: jq
+[2026-09-06 01:10:04] [INFO] Updating package managers...
+[2026-09-06 01:10:04] [INFO] Updating pacman database...
+[2026-09-06 01:10:04] [INFO] Updating yay database...
+[2026-09-06 01:10:05] [INFO] Package managers updated.
+[2026-09-06 01:10:05] [INFO] Processing block: install-utils
+[2026-09-06 01:10:05] [INFO] [pacman] Installing git stow
+[2026-09-06 01:10:05] [INFO] [pacman] Installation completed
+[2026-09-06 01:10:05] [INFO] Processing block: base
+[2026-09-06 01:10:06] [INFO] [pacman] Installing tmux
+[2026-09-06 01:10:07] [INFO] [pacman] Installation completed
+[2026-09-06 01:10:07] [INFO] All packages processed successfully

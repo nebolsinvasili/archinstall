@@ -1,0 +1,20 @@
+{
+    "install-utils": {
+
+        "packages": [
+            "git",
+            "stow",
+            "curl"
+        ]
+    },
+
+
+    "base": {
+
+        "manager": "yay",
+
+        "packages": [
+            "obsidian"
+        ]
+    }
+}

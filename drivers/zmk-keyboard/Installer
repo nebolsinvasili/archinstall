@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# ============================================================
+#
+# ██╗███╗   ██╗███████╗████████╗ █████╗ ██╗     ██╗     ███████╗██████╗ 
+# ██║████╗  ██║██╔════╝╚══██╔══╝██╔══██╗██║     ██║     ██╔════╝██╔══██╗
+# ██║██╔██╗ ██║███████╗   ██║   ███████║██║     ██║     █████╗  ██████╔╝
+# ██║██║╚██╗██║╚════██║   ██║   ██╔══██║██║     ██║     ██╔══╝  ██╔══██╗
+# ██║██║ ╚████║███████║   ██║   ██║  ██║███████╗███████╗███████╗██║  ██║
+# ╚═╝╚═╝  ╚═══╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝#
+#
+#  Project  : Default Installer
+#  Purpose  : Install template.
+#  Author   : nebolsinvasili
+#  Repo     : https://github.com/nebolsinvasili/dotfiles.git
+#
+#  License  : GPL-3.0
+#  Created  : 2026
+#  Updated  : 2026-01-08
+#
+# ============================================================
+
+
+set -euo pipefail
+
+# ------------------------------------------------------------
+# Load modules
+# ------------------------------------------------------------
+LOGGING_MODULE="$DOTFILES/.settings/logging"
+[[ -r "$LOGGING_MODULE" ]] && source "$LOGGING_MODULE" \
+    || printf 'WARNING: logging module not found: %s\n' "$LOGGING_MODULE" >&2
+
+LINKED_MODULE="$DOTFILES/.settings/linked"
+[[ -r "$LINKED_MODULE" ]] && source "$LINKED_MODULE" \
+    || printf 'WARNING: linked module not found: %s\n' "$LINKED_MODULE" >&2
+
+GIT_MODULE="$DOTFILES/.settings/git-utils"
+[[ -r "$GIT_MODULE" ]] && source "$GIT_MODULE" \
+    || printf 'WARNING: git utils module not found: %s\n' "$GIT_MODULE" >&2
+
+REPLACE_MODULE="$DOTFILES/.settings/replace"
+[[ -r "$REPLACE_MODULE" ]] && source "$REPLACE_MODULE" \
+    || printf 'WARNING: replace module not found: %s\n' "$REPLACE_MODULE" >&2
+
+DepInst_MODULE="$DOTFILES/.settings/DependenciesInstaller"
+[[ -r "$DepInst_MODULE" ]] && source "$DepInst_MODULE" \
+    || printf 'WARNING: dependencies module not found: %s\n' "$DepInst_MODULE" >&2
+
+
+# ------------------------------------------------------------
+# Default values
+# ------------------------------------------------------------
+
+
+
+# ============================================================
+# Modules
+# ============================================================
+
+
+
+# ============================================================
+# Main function
+# ============================================================
+main() {
+    # Absolute path of running script
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    DEP="$SCRIPT_DIR/dependencies.toml"
+    LOG="$SCRIPT_DIR/installer.log"
+
+    log_init "$LOG" && log_title "ZMK-Studio installer started"
+
+    install_dependencies -d "$DEP" -l "$LOG" -m yay
+
+    sudo stow -R -v -t "/" "config"
+
+    sudo udevadm control --reload
+
+    sudo usermod -a -G storage $USER
+
+    sudo usermod -a -G uucp $USER
+
+}
+
+# ============================================================
+# Main entry
+# ============================================================
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main
+fi
+

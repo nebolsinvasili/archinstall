@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Абсолютный путь
+BIN_DIR="$HOME/.config/bspwm/bin"
+
+# PATH (минимальный, но надёжный)
+export PATH="$BIN_DIR:/usr/local/bin:/usr/bin:/bin"
+
+# DBus (если не запущен)
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
+    eval "$(dbus-launch --sh-syntax --exit-with-session)"
+fi
+
+exec "$@"
+

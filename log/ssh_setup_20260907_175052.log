@@ -1,0 +1,26 @@
+[2026-09-07 17:50:52] [INFO] Installing base utilities and SSH...
+[2026-09-07 17:50:52] [DEBUG] Prerequisite package already installed: dialog
+[2026-09-07 17:50:52] [DEBUG] Prerequisite package already installed: jq
+[2026-09-07 17:50:52] [INFO] Updating package managers...
+[2026-09-07 17:50:52] [INFO] Updating pacman database...
+[2026-09-07 17:50:58] [INFO] Updating yay database...
+[2026-09-07 17:50:58] [INFO] Package managers updated.
+[2026-09-07 17:50:58] [INFO] Processing block: install-utils
+[2026-09-07 17:50:59] [INFO] [pacman] Installing git stow curl
+[2026-09-07 17:51:00] [INFO] [pacman] Installation completed
+[2026-09-07 17:51:00] [INFO] Processing block: utils
+[2026-09-07 17:51:00] [INFO] [pacman] Installing openssh xclip xdg-utils
+[2026-09-07 17:51:01] [INFO] [pacman] Installation completed
+[2026-09-07 17:51:01] [INFO] All packages processed successfully
+[2026-09-07 17:51:01] [INFO] SSH Configuration started
+[2026-09-07 17:51:01] [INFO] Select SSH key type:
+[2026-09-07 17:51:15] [WARN] Key file already exists: /home/nebolsinvasili/.ssh/id_ed25519
+[2026-09-07 17:51:16] [WARN] Existing key will be overwritten without backup.
+[2026-09-07 17:51:30] [INFO] The following SSH key will be created:
+[2026-09-07 17:51:31] [INFO] Generating SSH key...
+[2026-09-07 17:51:31] [OK] SSH key successfully generated.
+[2026-09-07 17:51:31] [INFO] Starting ssh-agent and adding key...
+[2026-09-07 17:51:36] [OK] Key added to ssh-agent.
+[2026-09-07 17:51:36] [OK] Public key copied to clipboard (X11).
+[2026-09-07 17:51:36] [OK] SSH key generation completed successfully.
+[2026-09-07 17:51:37] [INFO] Opening GitHub SSH settings...

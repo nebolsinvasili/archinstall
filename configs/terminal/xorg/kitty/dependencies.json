@@ -1,0 +1,15 @@
+{
+  "install-utils": {
+    "packages": ["git", "stow"]
+  },
+
+  "base": {
+    "manager": "yay",
+    "packages": ["kitty"]
+  },
+
+  "fonts": {
+    "manager": "yay",
+    "packages": ["nerd-fonts"]
+  }
+}

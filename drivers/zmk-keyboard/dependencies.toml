@@ -1,0 +1,8 @@
+[base]
+packages = [ "zmk-studio-bin" ]
+
+[utils]
+packages= [ "uucp" ]
+
+[install-utils]
+packages = [ "stow" ]

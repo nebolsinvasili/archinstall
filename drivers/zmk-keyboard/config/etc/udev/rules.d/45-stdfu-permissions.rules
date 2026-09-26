@@ -1,0 +1,5 @@
+# All STMicroelectronics STM32 devices
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="****", GROUP="plugdev", MODE="0664"
+# All Artery AT32 devices
+SUBSYSTEM=="usb", ATTRS{idVendor}=="2e3c", ATTRS{idProduct}=="****", GROUP="plugdev", MODE="0664"
+

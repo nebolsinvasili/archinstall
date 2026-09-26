@@ -1,0 +1,38 @@
+{
+    "install-utils": {
+
+        "packages": [
+            "curl",
+            "git",
+            "stow"
+        ]
+    },
+
+
+    "base": {
+
+        "packages": [
+            "ollama",
+            "ollama-cuda",
+            "opencode"
+        ]
+    },
+
+
+    "stt": {
+
+        "manager": "yay",
+
+        "packages": [
+            "whispering-bin"
+        ]
+    },
+
+
+    "stt-utils": {
+
+        "packages": [
+            "vulkan-icd-loader"
+        ]
+    }
+}

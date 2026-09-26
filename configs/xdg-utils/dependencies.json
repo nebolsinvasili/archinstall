@@ -1,0 +1,17 @@
+{
+    "install-utils": {
+
+        "packages": [
+            "git",
+            "stow"
+        ]
+    },
+
+
+    "base": {
+
+        "packages": [
+            "xdg-utils"
+        ]
+    }
+}

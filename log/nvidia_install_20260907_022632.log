@@ -1,0 +1,13 @@
+[2026-09-07 02:26:32] [OK] Определение видеокарты...
+[2026-09-07 02:26:32] [INFO] Найден GPU: 10de:1c82
+[2026-09-07 02:26:32] [OK] Выбрана база драйвера: nvidia
+[2026-09-07 02:26:32] [INFO] Будут установлены пакеты: nvidia-dkms nvidia-utils lib32-nvidia-utils nvidia-settings opencl-nvidia lib32-opencl-nvidia nvtop
+[2026-09-07 02:26:32] [OK] Поиск установленных пакетов NVIDIA для удаления...
+[2026-09-07 02:26:32] [WARN] Обнаружены старые пакеты NVIDIA: lib32-nvidia-580xx-utils
+nvidia-580xx-dkms
+nvidia-580xx-settings
+nvidia-580xx-settings-debug
+nvidia-580xx-utils
+nvidia-container-toolkit
+[2026-09-07 02:26:32] [OK] Удаляем их перед установкой новых...
+[2026-09-07 02:26:52] [OK] Установка драйверов через yay...
