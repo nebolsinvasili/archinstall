@@ -20,203 +20,190 @@ done
 source "$ROOT_DIR/lib/init.sh"
 
 # ============================================================
-# Progress bar
+# Usage
 # ============================================================
-progress_bar() {
-    local duration="${1:-3}"
-    local width=30
+usage() {
 
-    local delay
-    delay=$(awk "BEGIN{printf \"%.3f\", ${duration}/${width}}")
+    cat <<EOF
+${C_CYAN}Установка zsh${C_RESET}
 
-    for ((i=0; i<=width; i++)); do
-        local percent=$((i*100/width))
+${C_CYAN}Использование:${C_RESET}
+  $0 [-h] [пользователь...]
 
-        printf "\r${C_CYAN}Загрузка:${C_RESET} ["
+${C_CYAN}Аргументы:${C_RESET}
+  пользователь   учётная запись (можно указать несколько через пробел или запятую)
 
-        printf "%${i}s" "" | tr ' ' '#'
-        printf "%$((width-i))s" "" | tr ' ' '-'
-
-        printf "] %3d%%" "$percent"
-
-        sleep "$delay"
-    done
-
-    printf "\n"
+${C_CYAN}Примеры:${C_RESET}
+  $0                      zsh для всех пользователей
+  $0 tester               zsh только для tester
+  $0 tester,svc           zsh для tester и svc
+  $0 -n                   установка пакетов в режиме dry-run
+EOF
 }
 
 # ============================================================
-# User selection
+# zsh
 # ============================================================
-choose_user() {
+ensure_zsh_installed() {
 
-    local users=()
-
-    mapfile -t users < <(
-        getent passwd |
-        awk -F: '$6 ~ "^/home/" {print $1}'
-    )
-
-    if [[ ${#users[@]} -eq 0 ]]; then
-        echo "Не найдено пользователей." >&2
-        return 1
-    fi
-
-    log_info "Выберите пользователя:" >&2
-
-    local i
-    for i in "${!users[@]}"; do
-        printf "  ${C_YELLOW}%2d)${C_RESET} %s\n" \
-            "$((i+1))" "${users[$i]}" >&2
-    done
-
-    printf "  ${C_YELLOW}%2d)${C_RESET} root\n" 0 >&2
-
-    local choice
-
-    read -rp "Введите номер [1]: " choice
-    choice=${choice:-1}
-
-    if [[ ! "$choice" =~ ^[0-9]+$ ]]; then
-        echo "Некорректный ввод." >&2
-        return 1
-    fi
-
-    if ((choice == 0)); then
-        echo "root /root"
+    if command -v zsh >/dev/null 2>&1; then
+        log_ok "zsh уже установлен."
         return 0
     fi
 
-    if ((choice < 1 || choice > ${#users[@]})); then
-        echo "Некорректный выбор." >&2
-        return 1
+    log_info "Устанавливаем zsh..."
+
+    if [[ $EUID -eq 0 ]]; then
+        pacman -S --noconfirm zsh
+    else
+        sudo pacman -S --noconfirm zsh
     fi
-
-    local user="${users[$((choice-1))]}"
-
-    echo "$user /home/$user"
 }
 
-# ============================================================
-# Shell selection
-# ============================================================
-choose_shell() {
+# Без записи в /etc/shells chsh откажется назначать zsh
+ensure_zsh_in_shells() {
 
-    local shells=()
+    if grep -qxF /bin/zsh /etc/shells; then
+        return 0
+    fi
 
-    mapfile -t shells < <(grep '^/' /etc/shells)
+    log_info "Добавляем /bin/zsh в /etc/shells..."
 
-    echo >&2
-    echo "Доступные shell:" >&2
+    if [[ $EUID -eq 0 ]]; then
+        echo /bin/zsh >> /etc/shells
+    else
+        echo /bin/zsh | sudo tee -a /etc/shells >/dev/null
+    fi
+}
 
-    local i
+# Пользователи для обработки: переданный список или, если он пуст,
+# Если список пользователей не передан - берём root и все учётные записи
+# с UID 1000-65534, иначе используем только переданный список
+list_shell_users() {
 
-    for i in "${!shells[@]}"; do
-        printf "  ${C_YELLOW}%2d)${C_RESET} %s\n" \
-            "$((i+1))" "${shells[$i]}" >&2
+    local -a requested=("$@")
+
+    if [[ ${#requested[@]} -eq 0 ]]; then
+        getent passwd |
+            awk -F: '($1 == "root" || ($3 >= 1000 && $3 < 65534)) { print $1 }'
+        return 0
+    fi
+
+    local user name resolved=()
+    local -a names=()
+
+    # список мог прийти как "tester,svc"
+    for user in "${requested[@]}"; do
+        names+=("${user//,/ }")
     done
 
-    local choice
+    for name in ${names[@]}; do
+        user="$(getent passwd "$name" | cut -d: -f1)"
 
-    read -rp "Введите номер [1]: " choice
-    choice=${choice:-1}
+        if [[ -z "$user" ]]; then
+            log_error "Пользователь не найден: $name."
+            return 1
+        fi
 
-    if [[ ! "$choice" =~ ^[0-9]+$ ]]; then
-        echo "Некорректный ввод." >&2
-        return 1
-    fi
+        resolved+=("$user")
+    done
 
-    if ((choice < 1 || choice > ${#shells[@]})); then
-        echo "Некорректный выбор." >&2
-        return 1
-    fi
-
-    echo "${shells[$((choice-1))]}"
+    printf '%s\n' "${resolved[@]}"
 }
 
-# ============================================================
-# Change shell
-# ============================================================
-change_shell() {
+apply_shell() {
 
     local user="$1"
     local shell="$2"
 
-    if ! grep -qxF "$shell" /etc/shells; then
-        log_error "Shell отсутствует в /etc/shells: $shell"
-        return 1
-    fi
-
-    current_shell="$(getent passwd "$TARGET_USER" | cut -d: -f7)"
-
-    if [[ "$current_shell" == "$NEWSHELL" ]]; then
-        log_info "Shell уже установлен: $NEWSHELL"
+    if [[ $EUID -eq 0 ]]; then
+        usermod -s "$shell" "$user"
     else
-        if sudo chsh -s "$NEWSHELL" "$TARGET_USER"; then
-            log_ok "Shell изменён."
-        else
-            log_error "Ошибка смены shell."
-            exit 1
-        fi
+        sudo usermod -s "$shell" "$user"
     fi
 }
 
-# ============================================================
-# Install dotfiles
-# ============================================================
-install_dotfiles() {
+# zsh оболочкой по умолчанию: для переданных пользователей или для всех
+set_shell_for_users() {
 
-    local target="$1"
+    local shell="/bin/zsh"
+    local user current found
+    local changed=0
+    local failed=0
+    local -a users=()
 
-    stow \
-        --adopt \
-        -R \
-        -d "$SCRIPT_DIR" \
-        -t "$TARGET_HOME" \
-        config
+    if ! found="$(list_shell_users "$@")"; then
+        return 1
+    fi
+
+    mapfile -t users < <(printf '%s\n' "$found" | grep -v '^$' | sort -u)
+
+    if [[ ${#users[@]} -eq 0 ]]; then
+        log_error "Не найдено пользователей для обработки."
+        return 1
+    fi
+
+    for user in "${users[@]}"; do
+        current="$(getent passwd "$user" | cut -d: -f7)"
+
+        if [[ "$current" == "$shell" ]]; then
+            log_info "Оболочка пользователя $user уже $shell."
+            continue
+        fi
+
+        if apply_shell "$user" "$shell"; then
+            log_ok "Оболочка пользователя $user: $shell"
+            changed=1
+        else
+            log_error "Не удалось сменить оболочку пользователя $user."
+            failed=$(( failed + 1 ))
+        fi
+    done
+
+    if [[ $failed -gt 0 ]]; then
+        log_error "Оболочка не изменена у $failed пользователей."
+    elif [[ $changed -eq 0 ]]; then
+        log_info "Смена оболочки не требуется."
+    fi
 }
 
 # ============================================================
 # Main
 # ============================================================
 main() {
-    
+
+    local -a users=()
+
+    while (($#)); do
+        case "$1" in
+
+            -h|--help)
+
+                usage
+                return 0
+                ;;
+
+            -*)
+                # флаги установщика пакетов (например -n) не касаются zsh
+                shift
+                ;;
+
+            *)
+
+                users+=("$1")
+                shift
+                ;;
+
+        esac
+    done
+
     log_info "Changing shell..."
 
-    local TARGET_USER
-    local TARGET_HOME
-    local NEWSHELL
-
-    if ! read -r TARGET_USER TARGET_HOME < <(choose_user); then
-        log_error "Выбор пользователя отменён."
-        exit 1
-    fi
-
-    log_info "Пользователь: $TARGET_USER"
-    log_info "Домашний каталог: $TARGET_HOME"
-
-    if ! NEWSHELL=$(choose_shell); then
-        log_error "Выбор shell отменён."
-        exit 1
-    fi
-
-    log_info "Выбран shell: $NEWSHELL"
-
-    change_shell "$TARGET_USER" "$NEWSHELL"
-
-    log_info "Устанавливаем dotfiles..."
-
-    install_dotfiles "$TARGET_HOME"
-
-    log_ok "Dotfiles установлены."
-
-    progress_bar 2
+    ensure_zsh_installed
+    ensure_zsh_in_shells
+    set_shell_for_users "${users[@]}"
 
     log_ok "Установка успешно завершена."
-
-    if [[ "$TARGET_USER" == "$(whoami)" ]]; then
-        exec "$NEWSHELL" -l
-    fi
 }
 
 # ============================================================

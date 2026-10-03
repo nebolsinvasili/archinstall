@@ -533,26 +533,318 @@ create_user_manual() {
     return 0
 }
 
-# Функция для выбора рабочего стола
-select_desktop_manual() {
-    CHOICE=$(whiptail --title "Выбор рабочего стола" \
-                      --menu "Выберите рабочий стол:" 16 70 11 \
-                      "1" "KDE Plasma (полная)" \
-                      "2" "KDE Plasma (облегченная)" \
-                      "3" "GNOME (полная)" \
-                      "4" "GNOME (облегченная)" \
-                      "5" "XFCE" \
-                      "6" "Cinnamon" \
-                      "7" "MATE" \
-                      "8" "LXQt" \
-                      "9" "i3" \
-                      "0" "Не устанавливать рабочий стол" \
+# Функция для назначения zsh оболочкой по умолчанию для всех пользователей
+set_default_shell() {
+    local target=$1
+    local shell="/bin/zsh"
+
+    if [ ! -e "$target$shell" ]; then
+        echo "  → Установка zsh..."
+        arch-chroot "$target" pacman -S --noconfirm zsh
+    fi
+
+    if ! grep -qxF "$shell" "$target/etc/shells" 2>/dev/null; then
+        echo "$shell" >> "$target/etc/shells"
+    fi
+
+    local users user current
+    users=$(arch-chroot "$target" getent passwd | awk -F: '($1 == "root" || ($3 >= 1000 && $3 < 65534)) { print $1 }')
+
+    for user in $users; do
+        current=$(arch-chroot "$target" getent passwd "$user" | cut -d: -f7)
+        if [ "$current" != "$shell" ]; then
+            arch-chroot "$target" usermod -s "$shell" "$user"
+            echo "  → Оболочка пользователя $user: $shell"
+        else
+            echo "  → Оболочка пользователя $user уже $shell"
+        fi
+    done
+}
+
+# Функция для создания стандартных пользовательских папок с английскими именами
+# (XDG user dirs), чтобы локаль ru_RU не подставляла русские названия
+configure_user_dirs() {
+    local target=$1
+    local user=$2
+
+    local -a dirs=(
+        Desktop
+        Documents
+        Downloads
+        Music
+        Pictures
+        Public
+        Templates
+        Videos
+    )
+
+    # системный default для всех новых пользователей, включая root
+    mkdir -p "$target/etc/xdg"
+    cat > "$target/etc/xdg/user-dirs.conf" <<'EOF'
+enabled=True
+user-xdg-desktop-dir="$HOME/Desktop"
+user-xdg-documents-dir="$HOME/Documents"
+user-xdg-download-dir="$HOME/Downloads"
+user-xdg-music-dir="$HOME/Music"
+user-xdg-pictures-dir="$HOME/Pictures"
+user-xdg-publicshare-dir="$HOME/Public"
+user-xdg-templates-dir="$HOME/Templates"
+user-xdg-videos-dir="$HOME/Videos"
+EOF
+
+    # то же в /etc/skel, чтобы новые пользователи получали английские папки
+    mkdir -p "$target/etc/skel/.config"
+    cat > "$target/etc/skel/.config/user-dirs.dirs" <<'EOF'
+enabled=True
+XDG_DESKTOP_DIR="$HOME/Desktop"
+XDG_DOCUMENTS_DIR="$HOME/Documents"
+XDG_DOWNLOAD_DIR="$HOME/Downloads"
+XDG_MUSIC_DIR="$HOME/Music"
+XDG_PICTURES_DIR="$HOME/Pictures"
+XDG_PUBLICSHARE_DIR="$HOME/Public"
+XDG_TEMPLATES_DIR="$HOME/Templates"
+XDG_VIDEOS_DIR="$HOME/Videos"
+EOF
+
+    if [ -z "$user" ] || [ ! -d "$target/home/$user" ]; then
+        echo "  → Стандартные папки (XDG): только системный default"
+        return 0
+    fi
+
+    local home="$target/home/$user"
+    local dir
+
+    echo "  → Создание стандартных папок пользователя $user (английские имена)..."
+
+    mkdir -p "$home/.config"
+
+    for dir in "${dirs[@]}"; do
+        mkdir -p "$home/$dir"
+    done
+
+    cat > "$home/.config/user-dirs.dirs" <<'EOF'
+# This file is written by xdg-user-dirs-update
+# If you want to remove or change a directory, just edit the lines below.
+enabled=True
+XDG_DESKTOP_DIR="$HOME/Desktop"
+XDG_DOCUMENTS_DIR="$HOME/Documents"
+XDG_DOWNLOAD_DIR="$HOME/Downloads"
+XDG_MUSIC_DIR="$HOME/Music"
+XDG_PICTURES_DIR="$HOME/Pictures"
+XDG_PUBLICSHARE_DIR="$HOME/Public"
+XDG_TEMPLATES_DIR="$HOME/Templates"
+XDG_VIDEOS_DIR="$HOME/Videos"
+EOF
+
+    arch-chroot "$target" chown -R "$user:$user" "/home/$user/.config"
+
+    for dir in "${dirs[@]}"; do
+        arch-chroot "$target" chown "$user:$user" "/home/$user/$dir"
+    done
+}
+
+# Функция для получения параметров выбранного профиля рабочего стола или WM
+# Формат: "название|пакеты|флаги"
+# Флаги: dw - рабочий стол Wayland (добавляется firefox), dX - рабочий стол Xorg
+#        (полный набор xorg), w - WM Wayland, x - WM Xorg (минимальный набор),
+#        xs:имя - WM Xorg без файла сессии, для него создаются .xinitrc и .desktop
+desktop_profile() {
+    # тег может прийти из whiptail в кавычках, например "2"
+    local tag="${1//\"/}"
+    case "$tag" in
+        1)  echo "KDE Plasma (DE, Wayland)|plasma kde-applications plasma-wayland-protocols|dw" ;;
+        2)  echo "GNOME (DE, Wayland)|gnome gnome-extra|dw" ;;
+        3)  echo "LXQt (DE, Wayland)|lxqt breeze-icons lxqt-session|dw" ;;
+        4)  echo "Cinnamon (DE, Wayland)|cinnamon|dw" ;;
+        5)  echo "MATE (DE, Wayland)|mate mate-extra|dw" ;;
+        6)  echo "Sway (WM, Wayland)|sway swaybg swaylock swayidle waybar foot|w" ;;
+        7)  echo "Hyprland (WM, Wayland)|hyprland hyprlock waybar foot|w" ;;
+        8)  echo "niri (WM, Wayland)|niri waybar foot|w" ;;
+        9)  echo "River (WM, Wayland)|river waybar foot|w" ;;
+        10) echo "Wayfire (WM, Wayland)|wayfire waybar foot|w" ;;
+        11) echo "Qtile (WM, Wayland)|qtile waybar foot|w" ;;
+        12) echo "KDE Plasma (DE, Xorg)|plasma kde-applications|dX" ;;
+        13) echo "GNOME (DE, Xorg)|gnome gnome-extra|dX" ;;
+        14) echo "XFCE (DE, Xorg)|xfce4 xfce4-goodies|dX" ;;
+        15) echo "LXQt (DE, Xorg)|lxqt breeze-icons lxqt-session|dX" ;;
+        16) echo "Cinnamon (DE, Xorg)|cinnamon|dX" ;;
+        17) echo "MATE (DE, Xorg)|mate mate-extra|dX" ;;
+        18) echo "i3 (WM, Xorg)|i3-wm i3status i3lock dmenu alacritty rofi picom nitrogen feh network-manager-applet volumeicon xss-lock polkit-gnome ttf-dejavu ttf-droid ttf-font-awesome|xs:i3" ;;
+        19) echo "Openbox (WM, Xorg)|openbox tint2 alacritty nitrogen feh network-manager-applet volumeicon xss-lock polkit-gnome ttf-dejavu ttf-droid|x" ;;
+        20) echo "bspwm (WM, Xorg)|bspwm sxhkd dmenu alacritty picom nitrogen feh network-manager-applet volumeicon xss-lock polkit-gnome ttf-dejavu ttf-droid ttf-font-awesome|x" ;;
+        21) echo "dwm (WM, Xorg)|dwm dmenu alacritty picom nitrogen feh network-manager-applet volumeicon xss-lock polkit-gnome ttf-dejavu ttf-droid ttf-font-awesome|xs:dwm" ;;
+        22) echo "Awesome (WM, Xorg)|awesome ttf-dejavu|x" ;;
+        23) echo "Enlightenment (WM, Xorg)|enlightenment terminus-font|x" ;;
+        *)  echo "" ;;
+    esac
+}
+
+# Функция для получения списка названий выбранных профилей
+desktop_list_names() {
+    local tag info name result=""
+    for tag in $1; do
+        info=$(desktop_profile "$tag")
+        [ -n "$info" ] || continue
+        name="${info%%|*}"
+        if [ -n "$result" ]; then
+            result="$result, $name"
+        else
+            result="$name"
+        fi
+    done
+    echo "$result"
+}
+
+# Ширина терминала для диалогов whiptail, минимум 80 колонок
+dialog_width() {
+    local cols
+    cols=$(tput cols 2>/dev/null)
+    case "$cols" in
+        ''|*[!0-9]*) cols=80 ;;
+    esac
+    if [ "$cols" -lt 80 ]; then
+        cols=80
+    fi
+    echo "$cols"
+}
+
+# Короткое имя профиля без указания типа и графического стека
+desktop_short_name() {
+    local info name
+    info=$(desktop_profile "$1")
+    [ -n "$info" ] || return 1
+    name="${info%%|*}"
+    echo "${name%% (*}"
+}
+
+# Список коротких имён выбранных профилей через запятую
+desktop_list_short_names() {
+    local tag name result=""
+    for tag in $1; do
+        name=$(desktop_short_name "$tag") || continue
+        [ -n "$name" ] || continue
+        if [ -n "$result" ]; then
+            result="$result, $name"
+        else
+            result="$name"
+        fi
+    done
+    echo "$result"
+}
+
+# Значение для пункта меню: имена выбранных профилей, при нехватке места - счётчик остатка
+desktops_menu_value() {
+    local maxlen="${2:-50}"
+    local list item line="" suffix="" i=0 total sep=0
+    local -a names=()
+    list=$(desktop_list_short_names "$1")
+    if [ -z "$list" ]; then
+        echo "Не устанавливать"
+        return 0
+    fi
+    while [ -n "$list" ]; do
+        item="$list"
+        case "$list" in
+            *,*) item="${list%%,*}"; list="${list#*, }" ;;
+            *) list="" ;;
+        esac
+        names+=("$item")
+    done
+    total=${#names[@]}
+    while [ $i -lt $total ]; do
+        suffix=""
+        if [ $(( total - i )) -gt 1 ]; then
+            suffix=", ещё $(( total - i - 1 ))"
+        fi
+        sep=0
+        [ $i -gt 0 ] && sep=2
+        if [ $(( ${#line} + ${#names[$i]} + ${#suffix} + sep )) -le "$maxlen" ]; then
+            if [ $i -gt 0 ]; then
+                line="$line, ${names[$i]}"
+            else
+                line="${names[$i]}"
+            fi
+            i=$(( i + 1 ))
+        else
+            break
+        fi
+    done
+    if [ $i -lt $total ]; then
+        line="$line, ещё $(( total - i ))"
+    fi
+    printf '%s' "$line"
+}
+
+# Значение для экрана подтверждения: все выбранные профили одной строкой
+desktops_summary() {
+    local result
+    result=$(desktop_list_names "$1")
+    if [ -z "$result" ]; then
+        echo "Не устанавливать"
+    else
+        echo "$result"
+    fi
+}
+
+# Функция для формирования пунктов чеклиста с отметками текущего выбора
+# Результат: CHECKLIST_ARGS=(tag описание статус ...)
+build_checklist_args() {
+    local current=" $1 "
+    shift
+    CHECKLIST_ARGS=()
+    while [ $# -ge 2 ]; do
+        local tag="$1"
+        local desc="$2"
+        shift 2
+        local status="off"
+        case "$current" in
+            *" $tag "*) status="on" ;;
+        esac
+        CHECKLIST_ARGS+=("$tag" "$desc" "$status")
+    done
+}
+
+# Функция для выбора рабочих столов и оконных менеджеров, можно выбрать несколько
+# Отметка и снятие отметки выполняются пробелом
+select_desktops() {
+    build_checklist_args "$1" \
+        "1"  "KDE Plasma (DE, Wayland)" \
+        "2"  "GNOME (DE, Wayland)" \
+        "3"  "LXQt (DE, Wayland)" \
+        "4"  "Cinnamon (DE, Wayland, экспериментально)" \
+        "5"  "MATE (DE, Wayland, экспериментально)" \
+        "6"  "Sway (WM, Wayland)" \
+        "7"  "Hyprland (WM, Wayland)" \
+        "8"  "niri (WM, Wayland)" \
+        "9"  "River (WM, Wayland)" \
+        "10" "Wayfire (WM, Wayland)" \
+        "11" "Qtile (WM, Wayland)" \
+        "12" "KDE Plasma (DE, Xorg)" \
+        "13" "GNOME (DE, Xorg)" \
+        "14" "XFCE (DE, Xorg)" \
+        "15" "LXQt (DE, Xorg)" \
+        "16" "Cinnamon (DE, Xorg)" \
+        "17" "MATE (DE, Xorg)" \
+        "18" "i3 (WM, Xorg)" \
+        "19" "Openbox (WM, Xorg)" \
+        "20" "bspwm (WM, Xorg)" \
+        "21" "dwm (WM, Xorg)" \
+        "22" "Awesome (WM, Xorg)" \
+        "23" "Enlightenment (WM, Xorg)"
+
+    local dlg_w
+    dlg_w=$(dialog_width)
+
+    CHOICE=$(whiptail --title "Выбор рабочих столов и оконных менеджеров" \
+                      --checklist "Пробел - отметить или снять отметку, Enter - подтвердить\nМожно выбрать несколько или оставить список пустым:" 24 "$dlg_w" 16 \
+                      "${CHECKLIST_ARGS[@]}" \
                       3>&1 1>&2 2>&3 \
                       --ok-button "Выбрать" --cancel-button "Отмена")
     if [ $? -ne 0 ]; then
         return 1
     fi
-    echo "$CHOICE"
+    # whiptail возвращает теги чеклиста в кавычках ("2" "3") - убираем их
+    echo "${CHOICE//\"/}"
     return 0
 }
 
@@ -581,6 +873,37 @@ select_gpu_manual() {
                       "3" "Nvidia dkms (рекомендуемый)" \
                       "4" "Nvidia open" \
                       "0" "Не устанавливать драйверы" \
+                      3>&1 1>&2 2>&3 \
+                      --ok-button "Выбрать" --cancel-button "Отмена")
+    if [ $? -ne 0 ]; then
+        return 1
+    fi
+    echo "$CHOICE"
+    return 0
+}
+
+# Функция для получения названия диспетчера входа по его коду
+display_manager_name() {
+    case "$1" in
+        "1") echo "Ly (терминальный)" ;;
+        "2") echo "SDDM" ;;
+        "3") echo "GDM" ;;
+        "4") echo "LightDM" ;;
+        "0") echo "Не устанавливать" ;;
+        *) echo "Не выбран" ;;
+    esac
+}
+
+# Функция для выбора диспетчера входа
+select_display_manager_manual() {
+    CHOICE=$(whiptail --title "Выбор диспетчера входа" \
+                      --menu "Выберите менеджер входа в систему:\n\nLy - терминальный, самый быстрый (по умолчанию)" 17 70 5 \
+                      "1" "Ly (терминальный, по умолчанию)" \
+                      "2" "SDDM (KDE Plasma)" \
+                      "3" "GDM (GNOME)" \
+                      "4" "LightDM (XFCE, Cinnamon, MATE)" \
+                      "0" "Не устанавливать" \
+                      --default-item "1" \
                       3>&1 1>&2 2>&3 \
                       --ok-button "Выбрать" --cancel-button "Отмена")
     if [ $? -ne 0 ]; then
@@ -896,20 +1219,16 @@ select_encryption() {
     return 0
 }
 
-# Функция для выбора рабочего стола (автоустановка)
-select_desktop_auto() {
-    CHOICE=$(whiptail --title "Выбор рабочего стола" \
-                      --menu "Выберите рабочий стол:" 16 70 11 \
-                      "1" "KDE Plasma (полная)" \
-                      "2" "KDE Plasma (облегченная)" \
-                      "3" "GNOME (полная)" \
-                      "4" "GNOME (облегченная)" \
-                      "5" "XFCE" \
-                      "6" "Cinnamon" \
-                      "7" "MATE" \
-                      "8" "LXQt" \
-                      "9" "i3" \
-                      "0" "Не устанавливать рабочий стол" \
+# Функция для выбора диспетчера входа (автоустановка)
+select_display_manager_auto() {
+    CHOICE=$(whiptail --title "Выбор диспетчера входа" \
+                      --menu "Выберите менеджер входа в систему:\n\nLy - терминальный, самый быстрый (по умолчанию)" 17 70 5 \
+                      "1" "Ly (терминальный, по умолчанию)" \
+                      "2" "SDDM (KDE Plasma)" \
+                      "3" "GDM (GNOME)" \
+                      "4" "LightDM (XFCE, Cinnamon, MATE)" \
+                      "0" "Не устанавливать" \
+                      --default-item "1" \
                       3>&1 1>&2 2>&3 \
                       --ok-button "Выбрать" --cancel-button "Отмена")
     if [ $? -ne 0 ]; then
@@ -1061,6 +1380,192 @@ install_nvidia_drivers() {
             nvidia-settings opencl-nvidia lib32-opencl-nvidia \
             vulkan-icd-loader lib32-vulkan-icd-loader
     fi
+}
+
+# Функция для проверки наличия в списке GNOME
+desktop_list_has_gnome() {
+    local tag
+    for tag in $1; do
+        case "$tag" in
+            2|13) return 0 ;;
+        esac
+    done
+    return 1
+}
+
+# Функция для проверки наличия в списке WM без собственного файла сессии
+desktop_list_has_bare_wm() {
+    local tag info flags
+    for tag in $1; do
+        info=$(desktop_profile "$tag")
+        [ -n "$info" ] || continue
+        flags="${info##*|}"
+        case "$flags" in
+            xs:*) return 0 ;;
+        esac
+    done
+    return 1
+}
+
+# Функция для настройки запуска оконного менеджера без файла сессии
+setup_wm_session() {
+    local target=$1
+    local user=$2
+    local wm=$3
+
+    if [ -z "$user" ]; then
+        return 0
+    fi
+
+    if [ ! -f "$target/home/$user/.xinitrc" ]; then
+        cat > "$target/home/$user/.xinitrc" <<EOF
+#!/bin/sh
+exec $wm
+EOF
+        arch-chroot "$target" chown "$user:$user" "/home/$user/.xinitrc"
+        arch-chroot "$target" chmod +x "/home/$user/.xinitrc"
+    fi
+
+    mkdir -p "$target/usr/share/xsessions"
+    cat > "$target/usr/share/xsessions/$wm.desktop" <<EOF
+[Desktop Entry]
+Name=$wm
+Comment=Оконный менеджер $wm
+Exec=/usr/bin/$wm
+Type=Application
+DesktopNames=$wm
+EOF
+}
+
+# Функция для настройки автоматического запуска графической сессии на tty1
+setup_tty_autostart() {
+    local target=$1
+    local user=$2
+
+    if [ -z "$user" ]; then
+        return 0
+    fi
+
+    # файл входа зависит от оболочки: zsh читает .zprofile, bash - .bash_profile
+    local shell
+    local rc_file=".bash_profile"
+    shell=$(arch-chroot "$target" getent passwd "$user" | cut -d: -f7)
+    case "$shell" in
+        */zsh) rc_file=".zprofile" ;;
+    esac
+
+    cat >> "$target/home/$user/$rc_file" <<EOF
+
+if [ -z "\$DISPLAY" ] && [ "\$(tty)" = "/dev/tty1" ]; then
+    startx
+fi
+EOF
+    arch-chroot "$target" chown "$user:$user" "/home/$user/$rc_file"
+}
+
+# Функция для установки выбранных рабочих столов и оконных менеджеров
+install_desktop_group() {
+    local target=$1
+    local list=$2
+    local user=$3
+    local packages=""
+    local need_wayland=0
+    local need_xorg=0
+    local need_xorg_full=0
+    local need_firefox=0
+    local tag info name rest pkgs flags wm
+
+    if [ -z "$list" ]; then
+        return 0
+    fi
+
+    for tag in $list; do
+        info=$(desktop_profile "$tag")
+        if [ -z "$info" ]; then
+            echo -e "\033[1;33m  ! Неизвестный вариант DE/WM: $tag\033[0m"
+            continue
+        fi
+        name="${info%%|*}"
+        rest="${info#*|}"
+        pkgs="${rest%%|*}"
+        flags="${rest##*|}"
+        echo "  → Установка: $name"
+        packages="$packages $pkgs"
+        case "$flags" in
+            dw|dX) need_firefox=1 ;;
+        esac
+        case "$flags" in
+            dw|w) need_wayland=1 ;;
+        esac
+        case "$flags" in
+            dX) need_xorg=1; need_xorg_full=1 ;;
+            x|xs:*) need_xorg=1 ;;
+        esac
+        case "$flags" in
+            xs:*)
+                wm="${flags#xs:}"
+                echo "  → Настройка запуска $wm..."
+                setup_wm_session "$target" "$user" "$wm"
+                ;;
+        esac
+    done
+
+    if [ "$need_wayland" -eq 1 ]; then
+        packages="$packages wayland xorg-xwayland"
+    fi
+    if [ "$need_xorg_full" -eq 1 ]; then
+        packages="$packages xorg"
+    fi
+    if [ "$need_xorg" -eq 1 ] && [ "$need_xorg_full" -eq 0 ]; then
+        packages="$packages xorg-server xorg-xinit"
+    fi
+    if [ "$need_firefox" -eq 1 ]; then
+        packages="$packages firefox"
+    fi
+
+    if [ -z "$packages" ]; then
+        return 0
+    fi
+
+    echo "  → Установка пакетов..."
+    arch-chroot "$target" pacman -S --noconfirm $packages
+}
+
+# Функция для установки диспетчера входа
+install_display_manager() {
+    local target=$1
+    local dm=$2
+    local desktops=$3
+
+    if [ "$dm" != "3" ] && desktop_list_has_gnome "$desktops"; then
+        echo -e "\033[1;33m  ! Для GNOME рекомендуется GDM, с другими менеджерами входа часть функций может не работать\033[0m"
+    fi
+
+    case "$dm" in
+        "1")
+            echo "  → Установка диспетчера входа Ly..."
+            arch-chroot "$target" pacman -S --noconfirm ly
+            arch-chroot "$target" systemctl enable ly.service
+            ;;
+        "2")
+            echo "  → Установка диспетчера входа SDDM..."
+            arch-chroot "$target" pacman -S --noconfirm sddm sddm-kcm
+            arch-chroot "$target" systemctl enable sddm.service
+            ;;
+        "3")
+            echo "  → Установка диспетчера входа GDM..."
+            arch-chroot "$target" pacman -S --noconfirm gdm
+            arch-chroot "$target" systemctl enable gdm.service
+            ;;
+        "4")
+            echo "  → Установка диспетчера входа LightDM..."
+            arch-chroot "$target" pacman -S --noconfirm lightdm lightdm-gtk-greeter
+            arch-chroot "$target" systemctl enable lightdm.service
+            ;;
+        *)
+            echo "  → Диспетчер входа не устанавливается"
+            ;;
+    esac
 }
 
 # Функция для настройки pacman в целевой системе
@@ -1486,13 +1991,14 @@ show_settings_menu() {
     LANGUAGE=""
     REGION=""
     ENCRYPTION="none"
-    DESKTOP="0"
+    DESKTOP_LIST=""
     SWAP_SIZE="2"
     USERNAME=""
     USERPASS=""
     ROOTPASS=""
     KERNEL="1"
     GPU_DRIVERS="0"
+    DISPLAY_MANAGER="1"
 
     while true; do
         # Отображение значения диска
@@ -1533,20 +2039,9 @@ show_settings_menu() {
             *) ENC_VALUE="Не выбрано" ;;
         esac
 
-        # Отображение значения рабочего стола
-        case "$DESKTOP" in
-            "1") DESKTOP_VALUE="KDE Plasma (полная)" ;;
-            "2") DESKTOP_VALUE="KDE Plasma (облегченная)" ;;
-            "3") DESKTOP_VALUE="GNOME (полная)" ;;
-            "4") DESKTOP_VALUE="GNOME (облегченная)" ;;
-            "5") DESKTOP_VALUE="XFCE" ;;
-            "6") DESKTOP_VALUE="Cinnamon" ;;
-            "7") DESKTOP_VALUE="MATE" ;;
-            "8") DESKTOP_VALUE="LXQt" ;;
-            "9") DESKTOP_VALUE="i3" ;;
-            "0") DESKTOP_VALUE="Не устанавливать" ;;
-            *) DESKTOP_VALUE="Не выбран" ;;
-        esac
+        # Отображение значения рабочих столов и WM
+        DIALOG_W=$(dialog_width)
+        DESKTOP_VALUE=$(desktops_menu_value "$DESKTOP_LIST" $(( DIALOG_W - 30 )))
 
         # Отображение значения swap
         if [ "$SWAP_SIZE" = "0" ]; then
@@ -1580,18 +2075,22 @@ show_settings_menu() {
             *) GPU_VALUE="Не выбрано" ;;
         esac
 
+        # Отображение значения диспетчера входа
+        DM_VALUE=$(display_manager_name "$DISPLAY_MANAGER")
+
         MENU_CHOICE=$(whiptail --title "EasyArch Установщик - Настройки" \
-                               --menu "\n\n\n" 20 80 10 \
+                               --menu "\n\n\n" 22 "$DIALOG_W" 11 \
                                "1" "Диск (${DISK_VALUE})" \
                                "2" "Язык (${LANG_VALUE})" \
                                "3" "Регион (${REGION_VALUE})" \
                                "4" "Шифрование (${ENC_VALUE})" \
-                               "5" "Рабочий стол (${DESKTOP_VALUE})" \
+                               "5" "Рабочий стол / WM (${DESKTOP_VALUE})" \
                                "6" "Swap (${SWAP_VALUE})" \
                                "7" "Пользователь (${USER_VALUE})" \
                                "8" "Ядро (${KERNEL_VALUE})" \
                                "9" "Драйверы GPU (${GPU_VALUE})" \
-                               "10" "Начать установку" \
+                               "10" "Диспетчер входа (${DM_VALUE})" \
+                               "11" "Начать установку" \
                                3>&1 1>&2 2>&3 \
                                --ok-button "Выбрать" --cancel-button "Отмена")
 
@@ -1623,9 +2122,9 @@ show_settings_menu() {
                         fi
                         ;;
                     5)
-                        NEW_DESKTOP=$(select_desktop_auto)
-                        if [ $? -eq 0 ] && [ -n "$NEW_DESKTOP" ]; then
-                            DESKTOP="$NEW_DESKTOP"
+                        NEW_DESKTOP=$(select_desktops "$DESKTOP_LIST")
+                        if [ $? -eq 0 ]; then
+                            DESKTOP_LIST="$NEW_DESKTOP"
                         fi
                         ;;
                     6)
@@ -1654,6 +2153,12 @@ show_settings_menu() {
                         fi
                         ;;
                     10)
+                        NEW_DM=$(select_display_manager_auto)
+                        if [ $? -eq 0 ] && [ -n "$NEW_DM" ]; then
+                            DISPLAY_MANAGER="$NEW_DM"
+                        fi
+                        ;;
+                    11)
                         if [ -z "$DISK" ] || [ -z "$LANGUAGE" ] || [ -z "$USERNAME" ] || [ -z "$KERNEL" ] || [ -z "$REGION" ]; then
                             whiptail --title "Ошибка" --msgbox "Пожалуйста, заполните все обязательные параметры:\n\n- Диск\n- Язык\n- Регион\n- Пользователь\n- Ядро" 14 50
                             continue
@@ -1678,9 +2183,10 @@ show_manual_menu() {
     MANUAL_USERNAME=""
     MANUAL_USERPASS=""
     MANUAL_ROOTPASS=""
-    MANUAL_DESKTOP="0"
+    MANUAL_DESKTOP_LIST=""
     MANUAL_KERNEL="1"
     MANUAL_GPU="0"
+    MANUAL_DISPLAY_MANAGER="1"
     EXTRA_PACKAGES=""
 
     PARTITION_FS=()
@@ -1735,20 +2241,9 @@ show_manual_menu() {
             USER_VALUE="Не создан"
         fi
 
-        # Отображение значения рабочего стола
-        case "$MANUAL_DESKTOP" in
-            "1") DESKTOP_VALUE="KDE Plasma (полная)" ;;
-            "2") DESKTOP_VALUE="KDE Plasma (облегченная)" ;;
-            "3") DESKTOP_VALUE="GNOME (полная)" ;;
-            "4") DESKTOP_VALUE="GNOME (облегченная)" ;;
-            "5") DESKTOP_VALUE="XFCE" ;;
-            "6") DESKTOP_VALUE="Cinnamon" ;;
-            "7") DESKTOP_VALUE="MATE" ;;
-            "8") DESKTOP_VALUE="LXQt" ;;
-            "9") DESKTOP_VALUE="i3" ;;
-            "0") DESKTOP_VALUE="Не устанавливать" ;;
-            *) DESKTOP_VALUE="Не выбран" ;;
-        esac
+        # Отображение значения рабочих столов и WM
+        DIALOG_W=$(dialog_width)
+        DESKTOP_VALUE=$(desktops_menu_value "$MANUAL_DESKTOP_LIST" $(( DIALOG_W - 30 )))
 
         # Отображение значения ядра
         case "$MANUAL_KERNEL" in
@@ -1775,8 +2270,11 @@ show_manual_menu() {
             EXTRA_VALUE="Не указаны"
         fi
 
+        # Отображение значения диспетчера входа
+        DM_VALUE=$(display_manager_name "$MANUAL_DISPLAY_MANAGER")
+
         MENU_CHOICE=$(whiptail --title "EasyArch Установщик - Ручная установка" \
-                               --menu "\n\n\n" 24 80 13 \
+                               --menu "\n\n\n" 26 "$DIALOG_W" 14 \
                                "1" "Диск (${DISK_VALUE})" \
                                "2" "Разметка диска (cfdisk)" \
                                "3" "Выбор ФС (${FS_COUNT} разделов)" \
@@ -1785,11 +2283,12 @@ show_manual_menu() {
                                "6" "Язык (${LANG_VALUE})" \
                                "7" "Регион (${REGION_VALUE})" \
                                "8" "Пользователь (${USER_VALUE})" \
-                               "9" "Рабочий стол (${DESKTOP_VALUE})" \
+                               "9" "Рабочий стол / WM (${DESKTOP_VALUE})" \
                                "10" "Ядро (${KERNEL_VALUE})" \
                                "11" "Драйверы GPU (${GPU_VALUE})" \
-                               "12" "Дополнительные пакеты (${EXTRA_VALUE})" \
-                               "13" "Начать установку" \
+                               "12" "Диспетчер входа (${DM_VALUE})" \
+                               "13" "Дополнительные пакеты (${EXTRA_VALUE})" \
+                               "14" "Начать установку" \
                                3>&1 1>&2 2>&3 \
                                --ok-button "Выбрать" --cancel-button "Отмена")
 
@@ -1820,9 +2319,9 @@ show_manual_menu() {
                         fi
                         ;;
                     9)
-                        NEW_DESKTOP=$(select_desktop_manual)
-                        if [ $? -eq 0 ] && [ -n "$NEW_DESKTOP" ]; then
-                            MANUAL_DESKTOP="$NEW_DESKTOP"
+                        NEW_DESKTOP=$(select_desktops "$MANUAL_DESKTOP_LIST")
+                        if [ $? -eq 0 ]; then
+                            MANUAL_DESKTOP_LIST="$NEW_DESKTOP"
                         fi
                         ;;
                     10)
@@ -1837,8 +2336,14 @@ show_manual_menu() {
                             MANUAL_GPU="$NEW_GPU"
                         fi
                         ;;
-                    12) manual_extra_packages ;;
-                    13)
+                    12)
+                        NEW_DM=$(select_display_manager_manual)
+                        if [ $? -eq 0 ] && [ -n "$NEW_DM" ]; then
+                            MANUAL_DISPLAY_MANAGER="$NEW_DM"
+                        fi
+                        ;;
+                    13) manual_extra_packages ;;
+                    14)
                         if [ -z "$MANUAL_DISK" ] || [ -z "$MANUAL_LANGUAGE" ] || [ -z "$MANUAL_USERNAME" ] || [ -z "$MANUAL_KERNEL" ] || [ -z "$MANUAL_REGION" ]; then
                             whiptail --title "Ошибка" --msgbox "Пожалуйста, заполните все обязательные параметры:\n\n- Диск\n- Язык\n- Регион\n- Пользователь\n- Ядро" 14 50
                             continue
@@ -1960,7 +2465,7 @@ run_manual_installation() {
     echo "  → Выбрано ядро: $KERNEL_PKGS"
 
     pacstrap /mnt base base-devel $KERNEL_PKGS linux-firmware iucode-tool \
-        btrfs-progs dosfstools efibootmgr grub grub-btrfs \
+        btrfs-progs dosfstools efibootmgr grub grub-btrfs zsh xdg-user-dirs \
         amd-ucode intel-ucode networkmanager dhcpcd nano vim \
         archlinux-keyring --noconfirm
 
@@ -1995,11 +2500,16 @@ HOSTS
     echo "root:$MANUAL_ROOTPASS" | arch-chroot /mnt chpasswd
 
     echo "  → Создание пользователя $MANUAL_USERNAME"
-    arch-chroot /mnt useradd -m -G wheel -s /bin/bash "$MANUAL_USERNAME"
+    arch-chroot /mnt useradd -m -G wheel -s /bin/zsh "$MANUAL_USERNAME"
     echo "$MANUAL_USERNAME:$MANUAL_USERPASS" | arch-chroot /mnt chpasswd
 
     echo "  → Настройка sudo"
     echo "%wheel ALL=(ALL:ALL) ALL" >> /mnt/etc/sudoers
+
+    echo "  → Назначение zsh оболочкой по умолчанию для всех пользователей"
+    set_default_shell "/mnt"
+
+    configure_user_dirs "/mnt" "$MANUAL_USERNAME"
 
     # Установка GRUB
     install_grub_only "/mnt" "$MANUAL_DISK"
@@ -2021,82 +2531,18 @@ HOSTS
         esac
     fi
 
-    if [ "$MANUAL_DESKTOP" != "0" ]; then
+    if [ -n "$MANUAL_DESKTOP_LIST" ]; then
         echo ""
-        echo -e "\033[1;36m▶ Установка рабочего стола...\033[0m"
+        echo -e "\033[1;36m▶ Установка рабочих столов и оконных менеджеров...\033[0m"
 
-        case $MANUAL_DESKTOP in
-            1)
-                echo "  → Установка KDE Plasma (полная версия)"
-                arch-chroot /mnt pacman -S --noconfirm xorg plasma kde-applications \
-                    sddm sddm-kcm firefox plasma-wayland-protocols
-                arch-chroot /mnt systemctl enable sddm
-                ;;
-            2)
-                echo "  → Установка KDE Plasma (облегченная версия)"
-                arch-chroot /mnt pacman -S --noconfirm xorg plasma konsole dolphin \
-                    sddm sddm-kcm firefox plasma-wayland-protocols
-                arch-chroot /mnt systemctl enable sddm
-                ;;
-            3)
-                echo "  → Установка GNOME (полная версия)"
-                arch-chroot /mnt pacman -S --noconfirm xorg gnome gnome-extra \
-                    firefox gdm
-                arch-chroot /mnt systemctl enable gdm
-                ;;
-            4)
-                echo "  → Установка GNOME (облегченная версия)"
-                arch-chroot /mnt pacman -S --noconfirm xorg gnome-shell \
-                    gnome-terminal nautilus firefox gdm
-                arch-chroot /mnt systemctl enable gdm
-                ;;
-            5)
-                echo "  → Установка XFCE"
-                arch-chroot /mnt pacman -S --noconfirm xorg xfce4 xfce4-goodies \
-                    lightdm lightdm-gtk-greeter firefox
-                arch-chroot /mnt systemctl enable lightdm
-                ;;
-            6)
-                echo "  → Установка Cinnamon"
-                arch-chroot /mnt pacman -S --noconfirm xorg cinnamon \
-                    lightdm lightdm-slick-greeter firefox
-                arch-chroot /mnt systemctl enable lightdm
-                ;;
-            7)
-                echo "  → Установка MATE"
-                arch-chroot /mnt pacman -S --noconfirm xorg mate mate-extra \
-                    lightdm lightdm-slick-greeter firefox
-                arch-chroot /mnt systemctl enable lightdm
-                ;;
-            8)
-                echo "  → Установка LXQt"
-                arch-chroot /mnt pacman -S --noconfirm xorg lxqt breeze-icons \
-                    sddm sddm-kcm firefox
-                arch-chroot /mnt systemctl enable sddm
-                ;;
-            9)
-                echo "  → Установка i3 и необходимых компонентов..."
-                arch-chroot /mnt pacman -S --noconfirm xorg xorg-xinit i3-wm i3status i3lock \
-                    dmenu alacritty rofi picom nitrogen feh network-manager-applet volumeicon \
-                    xss-lock polkit-gnome ttf-dejavu ttf-droid ttf-font-awesome
+        install_desktop_group "/mnt" "$MANUAL_DESKTOP_LIST" "$MANUAL_USERNAME"
 
-                echo "  → Настройка автоматического входа в i3..."
-                arch-chroot /mnt cat > "/home/$MANUAL_USERNAME/.xinitrc" <<EOF
-#!/bin/sh
-exec i3
-EOF
-                arch-chroot /mnt chown "$MANUAL_USERNAME:$MANUAL_USERNAME" "/home/$MANUAL_USERNAME/.xinitrc"
-                arch-chroot /mnt chmod +x "/home/$MANUAL_USERNAME/.xinitrc"
+        if [ "$MANUAL_DISPLAY_MANAGER" = "0" ] && desktop_list_has_bare_wm "$MANUAL_DESKTOP_LIST"; then
+            echo "  → Настройка автоматического запуска графической сессии на tty1..."
+            setup_tty_autostart "/mnt" "$MANUAL_USERNAME"
+        fi
 
-                arch-chroot /mnt cat >> "/home/$MANUAL_USERNAME/.bash_profile" <<EOF
-
-if [ -z "\$DISPLAY" ] && [ "\$(tty)" = "/dev/tty1" ]; then
-    startx
-fi
-EOF
-                arch-chroot /mnt chown "$MANUAL_USERNAME:$MANUAL_USERNAME" "/home/$MANUAL_USERNAME/.bash_profile"
-                ;;
-        esac
+        install_display_manager "/mnt" "$MANUAL_DISPLAY_MANAGER" "$MANUAL_DESKTOP_LIST"
     fi
 
     if [ -n "$EXTRA_PACKAGES" ]; then
@@ -2477,12 +2923,12 @@ run_installation() {
     if [ "$INSTALL_TYPE" = "side" ]; then
         echo "  → Установка os-prober и ntfs-3g для обнаружения других ОС..."
         pacstrap /mnt base base-devel $KERNEL_PKGS linux-firmware iucode-tool \
-            btrfs-progs dosfstools efibootmgr grub grub-btrfs os-prober ntfs-3g \
+            btrfs-progs dosfstools efibootmgr grub grub-btrfs os-prober ntfs-3g zsh xdg-user-dirs \
             amd-ucode intel-ucode networkmanager dhcpcd nano vim \
             archlinux-keyring --noconfirm
     else
         pacstrap /mnt base base-devel $KERNEL_PKGS linux-firmware iucode-tool \
-            btrfs-progs dosfstools efibootmgr grub grub-btrfs \
+            btrfs-progs dosfstools efibootmgr grub grub-btrfs zsh xdg-user-dirs \
             amd-ucode intel-ucode networkmanager dhcpcd nano vim \
             archlinux-keyring --noconfirm
     fi
@@ -2518,11 +2964,16 @@ HOSTS
     echo "root:$ROOTPASS" | arch-chroot /mnt chpasswd
 
     echo "  → Создание пользователя $USERNAME"
-    arch-chroot /mnt useradd -m -G wheel -s /bin/bash "$USERNAME"
+    arch-chroot /mnt useradd -m -G wheel -s /bin/zsh "$USERNAME"
     echo "$USERNAME:$USERPASS" | arch-chroot /mnt chpasswd
 
     echo "  → Настройка sudo"
     echo "%wheel ALL=(ALL:ALL) ALL" >> /mnt/etc/sudoers
+
+    echo "  → Назначение zsh оболочкой по умолчанию для всех пользователей"
+    set_default_shell "/mnt"
+
+    configure_user_dirs "/mnt" "$USERNAME"
 
     # Установка GRUB
     install_grub_only "/mnt" "$DISK"
@@ -2544,82 +2995,18 @@ HOSTS
         esac
     fi
 
-    if [ "$DESKTOP" != "0" ]; then
+    if [ -n "$DESKTOP_LIST" ]; then
         echo ""
-        echo -e "\033[1;36m▶ Установка рабочего стола...\033[0m"
+        echo -e "\033[1;36m▶ Установка рабочих столов и оконных менеджеров...\033[0m"
 
-        case $DESKTOP in
-            1)
-                echo "  → Установка KDE Plasma (полная версия)"
-                arch-chroot /mnt pacman -S --noconfirm xorg plasma kde-applications \
-                    sddm sddm-kcm firefox plasma-wayland-protocols
-                arch-chroot /mnt systemctl enable sddm
-                ;;
-            2)
-                echo "  → Установка KDE Plasma (облегченная версия)"
-                arch-chroot /mnt pacman -S --noconfirm xorg  plasma konsole dolphin \
-                    sddm sddm-kcm firefox plasma-wayland-protocols
-                arch-chroot /mnt systemctl enable sddm
-                ;;
-            3)
-                echo "  → Установка GNOME (полная версия)"
-                arch-chroot /mnt pacman -S --noconfirm xorg gnome gnome-extra \
-                    firefox gdm
-                arch-chroot /mnt systemctl enable gdm
-                ;;
-            4)
-                echo "  → Установка GNOME (облегченная версия)"
-                arch-chroot /mnt pacman -S --noconfirm xorg gnome \
-                    gnome-control-center gnome-terminal nautilus firefox gdm
-                arch-chroot /mnt systemctl enable gdm
-                ;;
-            5)
-                echo "  → Установка XFCE"
-                arch-chroot /mnt pacman -S --noconfirm xorg xfce4 xfce4-goodies \
-                    lightdm lightdm-gtk-greeter firefox
-                arch-chroot /mnt systemctl enable lightdm
-                ;;
-            6)
-                echo "  → Установка Cinnamon"
-                arch-chroot /mnt pacman -S --noconfirm xorg cinnamon \
-                    lightdm lightdm-slick-greeter firefox
-                arch-chroot /mnt systemctl enable lightdm
-                ;;
-            7)
-                echo "  → Установка MATE"
-                arch-chroot /mnt pacman -S --noconfirm xorg mate mate-extra \
-                    lightdm lightdm-slick-greeter firefox
-                arch-chroot /mnt systemctl enable lightdm
-                ;;
-            8)
-                echo "  → Установка LXQt"
-                arch-chroot /mnt pacman -S --noconfirm xorg lxqt breeze-icons \
-                    sddm sddm-kcm firefox
-                arch-chroot /mnt systemctl enable sddm
-                ;;
-            9)
-                echo "  → Установка i3 и необходимых компонентов..."
-                arch-chroot /mnt pacman -S --noconfirm xorg xorg-xinit i3-wm i3status i3lock \
-                    dmenu alacritty rofi picom nitrogen feh network-manager-applet volumeicon \
-                    xss-lock polkit-gnome ttf-dejavu ttf-droid ttf-font-awesome
+        install_desktop_group "/mnt" "$DESKTOP_LIST" "$USERNAME"
 
-                echo "  → Настройка автоматического входа в i3..."
-                arch-chroot /mnt cat > "/home/$USERNAME/.xinitrc" <<EOF
-#!/bin/sh
-exec i3
-EOF
-                arch-chroot /mnt chown "$USERNAME:$USERNAME" "/home/$USERNAME/.xinitrc"
-                arch-chroot /mnt chmod +x "/home/$USERNAME/.xinitrc"
+        if [ "$DISPLAY_MANAGER" = "0" ] && desktop_list_has_bare_wm "$DESKTOP_LIST"; then
+            echo "  → Настройка автоматического запуска графической сессии на tty1..."
+            setup_tty_autostart "/mnt" "$USERNAME"
+        fi
 
-                arch-chroot /mnt cat >> "/home/$USERNAME/.bash_profile" <<EOF
-
-if [ -z "\$DISPLAY" ] && [ "\$(tty)" = "/dev/tty1" ]; then
-    startx
-fi
-EOF
-                arch-chroot /mnt chown "$USERNAME:$USERNAME" "/home/$USERNAME/.bash_profile"
-                ;;
-        esac
+        install_display_manager "/mnt" "$DISPLAY_MANAGER" "$DESKTOP_LIST"
     fi
 
     echo ""
@@ -2693,23 +3080,10 @@ main_installation() {
         CONFIRM_MSG="$CONFIRM_MSGДрайверы GPU: $GPU_NAME\n"
     fi
 
-    if [ "$DESKTOP" = "0" ]; then
-        CONFIRM_MSG="$CONFIRM_MSGРабочий стол: Не устанавливать\n"
-    else
-        case $DESKTOP in
-            1) DESKTOP_NAME="KDE Plasma (полная)" ;;
-            2) DESKTOP_NAME="KDE Plasma (облегченная)" ;;
-            3) DESKTOP_NAME="GNOME (полная)" ;;
-            4) DESKTOP_NAME="GNOME (облегченная)" ;;
-            5) DESKTOP_NAME="XFCE" ;;
-            6) DESKTOP_NAME="Cinnamon" ;;
-            7) DESKTOP_NAME="MATE" ;;
-            8) DESKTOP_NAME="LXQt" ;;
-            9) DESKTOP_NAME="i3" ;;
-            *) DESKTOP_NAME="Не установлен" ;;
-        esac
-        CONFIRM_MSG="$CONFIRM_MSGРабочий стол: $DESKTOP_NAME\n"
-    fi
+    CONFIRM_MSG="$CONFIRM_MSGРабочий стол / WM: $(desktops_summary "$DESKTOP_LIST")\n"
+
+    DM_NAME=$(display_manager_name "$DISPLAY_MANAGER")
+    CONFIRM_MSG="$CONFIRM_MSGДиспетчер входа: $DM_NAME\n"
 
     CONFIRM_MSG="$CONFIRM_MSG\nНачать установку?"
 
