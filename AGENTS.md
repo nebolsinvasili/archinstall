@@ -43,7 +43,7 @@ To add a shared helper, put it in a new `lib/<name>.sh` with a `__<NAME>_SH` gua
 - `lib/` — shared shell libraries, wired through `lib/init.sh` (colors, icons, logging, utils, path helpers, env, core).
 - `scripts/` — standalone utility scripts (`proxy-setup.sh`, `mount_disk.sh`) with the same preamble.
 - `cache/`, `log/` — runtime scratch dirs (default `LOG_DIR` is `$ROOT_DIR/log`); safe to ignore.
-- `builder/archinstall` — a separate 2700-line standalone EasyArch OS installer (interactive disk/menu tool), **not** part of the pkg-installer flow. `builder/README.md` describes the EasyArch project.
+- `builder/archinstall` — entrypoint of the separate EasyArch OS installer (interactive disk/menu tool), **not** part of the pkg-installer flow. It only resolves `SCRIPT_DIR`, sources the modules from `builder/lib/` and calls `main_installation`, so the whole `builder/` directory must be present. Modules: `core.sh` (globals, banner), `ui.sh`, `pacman.sh`, `disk.sh`, `partition.sh`, `locale.sh`, `user.sh`, `hardware.sh`, `bootloader.sh`, `desktop.sh`, `kernel.sh`, `menus.sh`, `install.sh`; each has a `__<NAME>_SH` guard and is not run standalone. `builder/README.md` describes the EasyArch project.
 - `test/test.sh` — a `dialog` menu mock, not a real test suite. There are no meaningful tests; verify changes by running the affected `setup.sh` with a dry-run (`-n`, expects to stop at `sudo`/`yay`).
 
 ## Conventions
