@@ -20,6 +20,7 @@ sudo ./archinstall
 | `lib/partition.sh` | ручная разметка диска (cfdisk, ФС, LUKS) |
 | `lib/locale.sh` | язык, регион, локали, консоль |
 | `lib/user.sh` | пользователи, zsh, стандартные папки |
+| `lib/aur.sh` | установка yay (помощника AUR) по умолчанию |
 | `lib/hardware.sh` | драйверы видеокарт |
 | `lib/bootloader.sh` | GRUB и другие ОС |
 | `lib/desktop.sh` | рабочие столы и оконные менеджеры |

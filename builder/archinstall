@@ -11,6 +11,7 @@
 #    partition.sh  - ручная разметка диска
 #    locale.sh     - язык, регион, локали
 #    user.sh       - пользователи, оболочка, стандартные папки
+#    aur.sh        - установка yay (помощника AUR)
 #    hardware.sh   - драйверы видеокарт
 #    bootloader.sh - загрузчик GRUB
 #    desktop.sh    - рабочие столы и оконные менеджеры
@@ -35,6 +36,7 @@ MODULES=(
     partition
     locale
     user
+    aur
     hardware
     bootloader
     desktop

@@ -68,6 +68,10 @@ HOSTS
     arch-chroot "$target" systemctl enable NetworkManager
     arch-chroot "$target" systemctl enable bluetooth
     arch-chroot "$target" systemctl enable cups
+
+    echo ""
+    echo -e "\033[1;36m▶ Установка помощника AUR...\033[0m"
+    install_yay "$target" "$username"
 }
 
 # Функция для выполнения ручной установки
