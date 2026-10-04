@@ -23,7 +23,7 @@ sudo ./archinstall
 | `lib/aur.sh` | установка yay (помощника AUR) по умолчанию |
 | `lib/hardware.sh` | драйверы видеокарт |
 | `lib/bootloader.sh` | GRUB и другие ОС |
-| `lib/desktop.sh` | рабочие столы и оконные менеджеры |
+| `lib/desktop.sh` | рабочие столы и оконные менеджеры, для KDE Plasma и GNOME есть полные и облегчённые версии |
 | `lib/kernel.sh` | выбор ядра |
 | `lib/menus.sh` | меню установщика |
 | `lib/install.sh` | сценарии автоустановки и ручной установки |

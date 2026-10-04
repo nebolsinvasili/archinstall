@@ -16,33 +16,39 @@ readonly __DESKTOP_SH=1
 # Флаги: dw - рабочий стол Wayland (добавляется firefox), dX - рабочий стол Xorg
 #        (полный набор xorg), w - WM Wayland, x - WM Xorg (минимальный набор),
 #        xs:имя - WM Xorg без файла сессии, для него создаются .xinitrc и .desktop
+# У KDE Plasma и GNOME есть две версии: полная и облегчённая (минимальный
+# набор пакетов: оболочка, терминал и файловый менеджер)
 desktop_profile() {
     # тег может прийти из whiptail в кавычках, например "2"
     local tag="${1//\"/}"
     case "$tag" in
-        1)  echo "KDE Plasma (DE, Wayland)|plasma kde-applications plasma-wayland-protocols|dw" ;;
-        2)  echo "GNOME (DE, Wayland)|gnome gnome-extra|dw" ;;
-        3)  echo "LXQt (DE, Wayland)|lxqt breeze-icons lxqt-session|dw" ;;
-        4)  echo "Cinnamon (DE, Wayland)|cinnamon|dw" ;;
-        5)  echo "MATE (DE, Wayland)|mate mate-extra|dw" ;;
-        6)  echo "Sway (WM, Wayland)|sway swaybg swaylock swayidle waybar foot|w" ;;
-        7)  echo "Hyprland (WM, Wayland)|hyprland hyprlock waybar foot|w" ;;
-        8)  echo "niri (WM, Wayland)|niri waybar foot|w" ;;
-        9)  echo "River (WM, Wayland)|river waybar foot|w" ;;
-        10) echo "Wayfire (WM, Wayland)|wayfire waybar foot|w" ;;
-        11) echo "Qtile (WM, Wayland)|qtile waybar foot|w" ;;
-        12) echo "KDE Plasma (DE, Xorg)|plasma kde-applications|dX" ;;
-        13) echo "GNOME (DE, Xorg)|gnome gnome-extra|dX" ;;
-        14) echo "XFCE (DE, Xorg)|xfce4 xfce4-goodies|dX" ;;
-        15) echo "LXQt (DE, Xorg)|lxqt breeze-icons lxqt-session|dX" ;;
-        16) echo "Cinnamon (DE, Xorg)|cinnamon|dX" ;;
-        17) echo "MATE (DE, Xorg)|mate mate-extra|dX" ;;
-        18) echo "i3 (WM, Xorg)|i3-wm i3status i3lock dmenu alacritty rofi picom nitrogen feh network-manager-applet volumeicon xss-lock polkit-gnome ttf-dejavu ttf-droid ttf-font-awesome|xs:i3" ;;
-        19) echo "Openbox (WM, Xorg)|openbox tint2 alacritty nitrogen feh network-manager-applet volumeicon xss-lock polkit-gnome ttf-dejavu ttf-droid|x" ;;
-        20) echo "bspwm (WM, Xorg)|bspwm sxhkd dmenu alacritty picom nitrogen feh network-manager-applet volumeicon xss-lock polkit-gnome ttf-dejavu ttf-droid ttf-font-awesome|x" ;;
-        21) echo "dwm (WM, Xorg)|dwm dmenu alacritty picom nitrogen feh network-manager-applet volumeicon xss-lock polkit-gnome ttf-dejavu ttf-droid ttf-font-awesome|xs:dwm" ;;
-        22) echo "Awesome (WM, Xorg)|awesome ttf-dejavu|x" ;;
-        23) echo "Enlightenment (WM, Xorg)|enlightenment terminus-font|x" ;;
+        1)  echo "KDE Plasma (DE, Wayland, полная)|plasma kde-applications plasma-wayland-protocols|dw" ;;
+        2)  echo "KDE Plasma (DE, Wayland, облегчённая)|plasma konsole dolphin plasma-wayland-protocols|dw" ;;
+        3)  echo "GNOME (DE, Wayland, полная)|gnome gnome-extra|dw" ;;
+        4)  echo "GNOME (DE, Wayland, облегчённая)|gnome-shell gnome-terminal nautilus|dw" ;;
+        5)  echo "LXQt (DE, Wayland)|lxqt breeze-icons lxqt-session|dw" ;;
+        6)  echo "Cinnamon (DE, Wayland, экспериментально)|cinnamon|dw" ;;
+        7)  echo "MATE (DE, Wayland, экспериментально)|mate mate-extra|dw" ;;
+        8)  echo "Sway (WM, Wayland)|sway swaybg swaylock swayidle waybar foot|w" ;;
+        9)  echo "Hyprland (WM, Wayland)|hyprland hyprlock waybar foot|w" ;;
+        10) echo "niri (WM, Wayland)|niri waybar foot|w" ;;
+        11) echo "River (WM, Wayland)|river waybar foot|w" ;;
+        12) echo "Wayfire (WM, Wayland)|wayfire waybar foot|w" ;;
+        13) echo "Qtile (WM, Wayland)|qtile waybar foot|w" ;;
+        14) echo "KDE Plasma (DE, Xorg, полная)|plasma plasma-x11-session kde-applications|dX" ;;
+        15) echo "KDE Plasma (DE, Xorg, облегчённая)|plasma plasma-x11-session konsole dolphin|dX" ;;
+        16) echo "GNOME (DE, Xorg, полная)|gnome gnome-extra|dX" ;;
+        17) echo "GNOME (DE, Xorg, облегчённая)|gnome-shell gnome-terminal nautilus|dX" ;;
+        18) echo "XFCE (DE, Xorg)|xfce4 xfce4-goodies|dX" ;;
+        19) echo "LXQt (DE, Xorg)|lxqt breeze-icons lxqt-session|dX" ;;
+        20) echo "Cinnamon (DE, Xorg)|cinnamon|dX" ;;
+        21) echo "MATE (DE, Xorg)|mate mate-extra|dX" ;;
+        22) echo "i3 (WM, Xorg)|i3-wm i3status i3lock dmenu alacritty rofi picom nitrogen feh network-manager-applet volumeicon xss-lock polkit-gnome ttf-dejavu ttf-droid ttf-font-awesome|xs:i3" ;;
+        23) echo "Openbox (WM, Xorg)|openbox tint2 alacritty nitrogen feh network-manager-applet volumeicon xss-lock polkit-gnome ttf-dejavu ttf-droid|x" ;;
+        24) echo "bspwm (WM, Xorg)|bspwm sxhkd dmenu alacritty picom nitrogen feh network-manager-applet volumeicon xss-lock polkit-gnome ttf-dejavu ttf-droid ttf-font-awesome|x" ;;
+        25) echo "dwm (WM, Xorg)|dwm dmenu alacritty picom nitrogen feh network-manager-applet volumeicon xss-lock polkit-gnome ttf-dejavu ttf-droid ttf-font-awesome|xs:dwm" ;;
+        26) echo "Awesome (WM, Xorg)|awesome ttf-dejavu|x" ;;
+        27) echo "Enlightenment (WM, Xorg)|enlightenment terminus-font|x" ;;
         *)  echo "" ;;
     esac
 }
@@ -64,12 +70,28 @@ desktop_list_names() {
 }
 
 # Короткое имя профиля без указания типа и графического стека
+# Вариант (полная/облегчённая) в имени сохраняется:
+# "KDE Plasma (DE, Wayland, облегчённая)" -> "KDE Plasma (облегчённая)"
 desktop_short_name() {
-    local info name
+    local info name inner variant
     info=$(desktop_profile "$1")
     [ -n "$info" ] || return 1
     name="${info%%|*}"
-    echo "${name%% (*}"
+    case "$name" in
+        *"("*")") ;;
+        *) echo "$name"; return 0 ;;
+    esac
+    inner="${name#* (}"
+    inner="${inner%)}"
+    variant=""
+    case "$inner" in
+        *,*,*) variant="${inner##*, }" ;;
+    esac
+    name="${name%% (*}"
+    if [ -n "$variant" ]; then
+        name="$name ($variant)"
+    fi
+    echo "$name"
 }
 
 # Список коротких имён выбранных профилей через запятую
@@ -163,35 +185,39 @@ build_checklist_args() {
 # Отметка и снятие отметки выполняются пробелом
 select_desktops() {
     build_checklist_args "$1" \
-        "1"  "KDE Plasma (DE, Wayland)" \
-        "2"  "GNOME (DE, Wayland)" \
-        "3"  "LXQt (DE, Wayland)" \
-        "4"  "Cinnamon (DE, Wayland, экспериментально)" \
-        "5"  "MATE (DE, Wayland, экспериментально)" \
-        "6"  "Sway (WM, Wayland)" \
-        "7"  "Hyprland (WM, Wayland)" \
-        "8"  "niri (WM, Wayland)" \
-        "9"  "River (WM, Wayland)" \
-        "10" "Wayfire (WM, Wayland)" \
-        "11" "Qtile (WM, Wayland)" \
-        "12" "KDE Plasma (DE, Xorg)" \
-        "13" "GNOME (DE, Xorg)" \
-        "14" "XFCE (DE, Xorg)" \
-        "15" "LXQt (DE, Xorg)" \
-        "16" "Cinnamon (DE, Xorg)" \
-        "17" "MATE (DE, Xorg)" \
-        "18" "i3 (WM, Xorg)" \
-        "19" "Openbox (WM, Xorg)" \
-        "20" "bspwm (WM, Xorg)" \
-        "21" "dwm (WM, Xorg)" \
-        "22" "Awesome (WM, Xorg)" \
-        "23" "Enlightenment (WM, Xorg)"
+        "1"  "KDE Plasma (DE, Wayland, полная)" \
+        "2"  "KDE Plasma (DE, Wayland, облегчённая)" \
+        "3"  "GNOME (DE, Wayland, полная)" \
+        "4"  "GNOME (DE, Wayland, облегчённая)" \
+        "5"  "LXQt (DE, Wayland)" \
+        "6"  "Cinnamon (DE, Wayland, экспериментально)" \
+        "7"  "MATE (DE, Wayland, экспериментально)" \
+        "8"  "Sway (WM, Wayland)" \
+        "9"  "Hyprland (WM, Wayland)" \
+        "10" "niri (WM, Wayland)" \
+        "11" "River (WM, Wayland)" \
+        "12" "Wayfire (WM, Wayland)" \
+        "13" "Qtile (WM, Wayland)" \
+        "14" "KDE Plasma (DE, Xorg, полная)" \
+        "15" "KDE Plasma (DE, Xorg, облегчённая)" \
+        "16" "GNOME (DE, Xorg, полная)" \
+        "17" "GNOME (DE, Xorg, облегчённая)" \
+        "18" "XFCE (DE, Xorg)" \
+        "19" "LXQt (DE, Xorg)" \
+        "20" "Cinnamon (DE, Xorg)" \
+        "21" "MATE (DE, Xorg)" \
+        "22" "i3 (WM, Xorg)" \
+        "23" "Openbox (WM, Xorg)" \
+        "24" "bspwm (WM, Xorg)" \
+        "25" "dwm (WM, Xorg)" \
+        "26" "Awesome (WM, Xorg)" \
+        "27" "Enlightenment (WM, Xorg)"
 
     local dlg_w
     dlg_w=$(dialog_width)
 
     CHOICE=$(whiptail --title "Выбор рабочих столов и оконных менеджеров" \
-                      --checklist "Пробел - отметить или снять отметку, Enter - подтвердить\nМожно выбрать несколько или оставить список пустым:" 24 "$dlg_w" 16 \
+                      --checklist "Пробел - отметить или снять отметку, Enter - подтвердить\nМожно выбрать несколько или оставить список пустым, KDE и GNOME есть облегчённые версии:" 24 "$dlg_w" 16 \
                       "${CHECKLIST_ARGS[@]}" \
                       3>&1 1>&2 2>&3 \
                       --ok-button "Выбрать" --cancel-button "Отмена")
@@ -246,7 +272,7 @@ desktop_list_has_gnome() {
     local tag
     for tag in $1; do
         case "$tag" in
-            2|13) return 0 ;;
+            3|4|16|17) return 0 ;;
         esac
     done
     return 1
