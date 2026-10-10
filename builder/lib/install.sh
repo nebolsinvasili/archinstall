@@ -613,10 +613,10 @@ main_installation() {
         CONFIRM_MSG="$CONFIRM_MSGДрайверы GPU: $GPU_NAME\n"
     fi
 
-    CONFIRM_MSG="$CONFIRM_MSGРабочий стол / WM: $(desktops_summary "$DESKTOP_LIST")\n"
-
     DM_NAME=$(display_manager_name "$DISPLAY_MANAGER")
     CONFIRM_MSG="$CONFIRM_MSGДиспетчер входа: $DM_NAME\n"
+
+    CONFIRM_MSG="$CONFIRM_MSGРабочий стол / WM: $(desktops_summary "$DESKTOP_LIST")\n"
 
     CONFIRM_MSG="$CONFIRM_MSG\nНачать установку?"
 

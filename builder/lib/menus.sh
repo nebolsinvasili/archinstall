@@ -186,12 +186,12 @@ show_settings_menu() {
                                "2" "Язык (${LANG_VALUE})" \
                                "3" "Регион (${REGION_VALUE})" \
                                "4" "Шифрование (${ENC_VALUE})" \
-                               "5" "Рабочий стол / WM (${DESKTOP_VALUE})" \
-                               "6" "Swap (${SWAP_VALUE})" \
-                               "7" "Пользователь (${USER_VALUE})" \
-                               "8" "Ядро (${KERNEL_VALUE})" \
-                               "9" "Драйверы GPU (${GPU_VALUE})" \
-                               "10" "Диспетчер входа (${DM_VALUE})" \
+                               "5" "Диспетчер входа (${DM_VALUE})" \
+                               "6" "Рабочий стол / WM (${DESKTOP_VALUE})" \
+                               "7" "Swap (${SWAP_VALUE})" \
+                               "8" "Пользователь (${USER_VALUE})" \
+                               "9" "Ядро (${KERNEL_VALUE})" \
+                               "10" "Драйверы GPU (${GPU_VALUE})" \
                                "11" "Начать установку" \
                                3>&1 1>&2 2>&3 \
                                --ok-button "Выбрать" --cancel-button "Отмена")
@@ -224,40 +224,40 @@ show_settings_menu() {
                         fi
                         ;;
                     5)
+                        NEW_DM=$(select_display_manager_auto)
+                        if [ $? -eq 0 ] && [ -n "$NEW_DM" ]; then
+                            DISPLAY_MANAGER="$NEW_DM"
+                        fi
+                        ;;
+                    6)
                         NEW_DESKTOP=$(select_desktops "$DESKTOP_LIST")
                         if [ $? -eq 0 ]; then
                             DESKTOP_LIST="$NEW_DESKTOP"
                         fi
                         ;;
-                    6)
+                    7)
                         NEW_SWAP=$(select_swap_auto)
                         if [ $? -eq 0 ] && [ -n "$NEW_SWAP" ]; then
                             SWAP_SIZE="$NEW_SWAP"
                         fi
                         ;;
-                    7)
+                    8)
                         NEW_USER_INFO=$(create_user_account)
                         if [ $? -eq 0 ] && [ -n "$NEW_USER_INFO" ]; then
                             USER_INFO="$NEW_USER_INFO"
                             IFS=':' read -r USERNAME USERPASS ROOTPASS <<< "$USER_INFO"
                         fi
                         ;;
-                    8)
+                    9)
                         NEW_KERNEL=$(select_kernel_auto)
                         if [ $? -eq 0 ] && [ -n "$NEW_KERNEL" ]; then
                             KERNEL="$NEW_KERNEL"
                         fi
                         ;;
-                    9)
+                    10)
                         NEW_GPU=$(select_gpu_auto)
                         if [ $? -eq 0 ] && [ -n "$NEW_GPU" ]; then
                             GPU_DRIVERS="$NEW_GPU"
-                        fi
-                        ;;
-                    10)
-                        NEW_DM=$(select_display_manager_auto)
-                        if [ $? -eq 0 ] && [ -n "$NEW_DM" ]; then
-                            DISPLAY_MANAGER="$NEW_DM"
                         fi
                         ;;
                     11)
@@ -385,10 +385,10 @@ show_manual_menu() {
                                "6" "Язык (${LANG_VALUE})" \
                                "7" "Регион (${REGION_VALUE})" \
                                "8" "Пользователь (${USER_VALUE})" \
-                               "9" "Рабочий стол / WM (${DESKTOP_VALUE})" \
-                               "10" "Ядро (${KERNEL_VALUE})" \
-                               "11" "Драйверы GPU (${GPU_VALUE})" \
-                               "12" "Диспетчер входа (${DM_VALUE})" \
+                               "9" "Диспетчер входа (${DM_VALUE})" \
+                               "10" "Рабочий стол / WM (${DESKTOP_VALUE})" \
+                               "11" "Ядро (${KERNEL_VALUE})" \
+                               "12" "Драйверы GPU (${GPU_VALUE})" \
                                "13" "Дополнительные пакеты (${EXTRA_VALUE})" \
                                "14" "Начать установку" \
                                3>&1 1>&2 2>&3 \
@@ -421,27 +421,27 @@ show_manual_menu() {
                         fi
                         ;;
                     9)
+                        NEW_DM=$(select_display_manager_manual)
+                        if [ $? -eq 0 ] && [ -n "$NEW_DM" ]; then
+                            MANUAL_DISPLAY_MANAGER="$NEW_DM"
+                        fi
+                        ;;
+                    10)
                         NEW_DESKTOP=$(select_desktops "$MANUAL_DESKTOP_LIST")
                         if [ $? -eq 0 ]; then
                             MANUAL_DESKTOP_LIST="$NEW_DESKTOP"
                         fi
                         ;;
-                    10)
+                    11)
                         NEW_KERNEL=$(select_kernel_manual)
                         if [ $? -eq 0 ] && [ -n "$NEW_KERNEL" ]; then
                             MANUAL_KERNEL="$NEW_KERNEL"
                         fi
                         ;;
-                    11)
+                    12)
                         NEW_GPU=$(select_gpu_manual)
                         if [ $? -eq 0 ] && [ -n "$NEW_GPU" ]; then
                             MANUAL_GPU="$NEW_GPU"
-                        fi
-                        ;;
-                    12)
-                        NEW_DM=$(select_display_manager_manual)
-                        if [ $? -eq 0 ] && [ -n "$NEW_DM" ]; then
-                            MANUAL_DISPLAY_MANAGER="$NEW_DM"
                         fi
                         ;;
                     13) manual_extra_packages ;;

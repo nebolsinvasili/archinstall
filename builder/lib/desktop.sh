@@ -429,8 +429,9 @@ install_display_manager() {
     case "$dm" in
         "1")
             echo "  → Установка диспетчера входа Ly..."
-            arch-chroot "$target" pacman -S --noconfirm ly
-            arch-chroot "$target" systemctl enable ly.service
+            arch-chroot "$target" pacman -S --noconfirm ly xorg-xauth
+            arch-chroot "$target" systemctl disable getty@tty2.service
+            arch-chroot "$target" systemctl enable ly@tty2.service
             ;;
         "2")
             echo "  → Установка диспетчера входа SDDM..."
