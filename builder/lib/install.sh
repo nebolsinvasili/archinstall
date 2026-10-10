@@ -155,7 +155,7 @@ run_manual_installation() {
     echo "  → Выбрано ядро: $KERNEL_PKGS"
 
     pacstrap /mnt base base-devel $KERNEL_PKGS linux-firmware iucode-tool \
-        btrfs-progs dosfstools efibootmgr grub grub-btrfs zsh xdg-user-dirs \
+        btrfs-progs dosfstools efibootmgr grub grub-btrfs zsh xdg-user-dirs kbd \
         amd-ucode intel-ucode networkmanager dhcpcd nano vim \
         archlinux-keyring --noconfirm
 
@@ -500,12 +500,12 @@ run_installation() {
     if [ "$INSTALL_TYPE" = "side" ]; then
         echo "  → Установка os-prober и ntfs-3g для обнаружения других ОС..."
         pacstrap /mnt base base-devel $KERNEL_PKGS linux-firmware iucode-tool \
-            btrfs-progs dosfstools efibootmgr grub grub-btrfs os-prober ntfs-3g zsh xdg-user-dirs \
+            btrfs-progs dosfstools efibootmgr grub grub-btrfs os-prober ntfs-3g zsh xdg-user-dirs kbd \
             amd-ucode intel-ucode networkmanager dhcpcd nano vim \
             archlinux-keyring --noconfirm
     else
         pacstrap /mnt base base-devel $KERNEL_PKGS linux-firmware iucode-tool \
-            btrfs-progs dosfstools efibootmgr grub grub-btrfs zsh xdg-user-dirs \
+            btrfs-progs dosfstools efibootmgr grub grub-btrfs zsh xdg-user-dirs kbd \
             amd-ucode intel-ucode networkmanager dhcpcd nano vim \
             archlinux-keyring --noconfirm
     fi
